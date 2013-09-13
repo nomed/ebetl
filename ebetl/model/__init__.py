@@ -63,9 +63,9 @@ def init_model(engine):
 # Import your model modules here.
 from ebetl.model.auth import User, Group, Permission
 from ebetl.model.dbretail import *
-from ebetl.model.fatmicrodb import Cli00, Cli00sede
-from ebetl.model.bizerba import Winvarp
-from ebetl.model.sisa import Sisa, SisaEan
-from ebetl.model.foodmart import Account
+#from ebetl.model.fatmicrodb import Cli00, Cli00sede
+#from ebetl.model.bizerba import Winvarp
+#from ebetl.model.sisa import Sisa, SisaEan
+#from ebetl.model.foodmart import Account
 from ebetl.model.zerobi import Factcogs, Factb2b
 #from ebetl.model.benettontv import UcbtvTabelle, UcbtvStagioni, UcbtvStagcol, UcbtvPLyxR, UcbtvPLyxT, UcbtvMessaggio
