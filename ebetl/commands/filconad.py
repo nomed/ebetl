@@ -15,7 +15,7 @@ from ebetl.commands import load_config
     
 class Filconad(Command):
     summary = "Process filconad"
-    usage = "--NO USAGE--"
+    usage = "paster filconad [options]"
     group_name = "ebetl.b2b"
     parser = Command.standard_parser(verbose=False)
     parser.add_option("-s", "--s",

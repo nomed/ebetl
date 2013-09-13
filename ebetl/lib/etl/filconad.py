@@ -131,37 +131,10 @@ class FilconadObj(object):
             fobj.content = content
             DBSession.add(fobj)
             DBSession.flush()
+            os.rename(fpath, os.path.join(self.path_output, 
+                                        str(fobj.fobj_id).zfill(8)+'txt')) 
+                                                
         transaction.commit()
-    
-    def get_dict(self, *args, **kw):
-        """
-        
-        """
-        
-        
-        ret = {}
-        f = open(self.path_file)
-        for r in f:             
-            row = []
-            r=strip_non_ascii(r)
-            cod_in_row = self.get_row_dict(r)
-            code = None
-            if cod_in_row:
-                code, index, rowdata = cod_in_row
-            if code == '01':
-                if not index in ret:
-                    ret[index]=[]
-                    numdoc=rowdata['numdoc']
-                    data=rowdata['data']
-                    mag=rowdata['mag']
-            elif code == '02':
-                row = [numdoc,data,mag]
-                for k in ['codfor','refpos','rep','desc','unitprice','qty','codiva','codqty','ean']:
-                    row.append(rowdata[k])
-                ret[index].append(row)            
-        return ret
-        
-        
 
     def write_out(self, *args, **kw):
         """
