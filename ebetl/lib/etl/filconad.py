@@ -178,6 +178,7 @@ class FilconadObj(object):
                                     src, func, key, res[src], newval       
                         ))
                 # probably skip if doc exists
+                factb2b_dict['row']=row                
                 and_c = and_(
                                  Factb2b.supplier_id==factb2b_dict['supplier_id'],
                                  Factb2b.inputb2b_id==factb2b_dict['inputb2b_id'],
@@ -188,23 +189,23 @@ class FilconadObj(object):
                                  Factb2b.b2b_code==factb2b_dict['b2b_code'],
                                  Factb2b.row==factb2b_dict['row'],
                                  )  
-                factb2b_dict['row']=row
+
+
                 try:
 
                     fobjrow = DBSession.query(Factb2b).filter(*and_c).one()
                     log.debug("fact_b2b: found row id %s"%(fobjrow.b2b_id))
                                 
                 except:
-
-                    fobjrows = DBSession.query(Factb2b).filter(*and_c).all()
-                    for fobj in fobjrows:
-                        log.debug("Error on b2b_code: %s rec_num %s sale_type %s"%(
-                                    fobj.b2b_code, fobj.rec_num, fobj.b2b_sale_type) )      
-                    raise
+                    #raise
+                    #fobjrows = DBSession.query(Factb2b).filter(*and_c).all()
+                    #for fobj in fobjrows:
+                    #    log.debug("Error on b2b_code: %s rec_num %s sale_type %s"%(
+                    #                fobj.b2b_code, fobj.rec_num, fobj.b2b_sale_type) )      
+                    #raise
                     fobjrow = Factb2b()  
-                    log.debug("fact_b2b: row NOT found")
-                                        
-                    from pprint import pprint
+                    log.debug("fact_b2b: row NOT found")                   
+                    #from pprint import pprint
                     #log.debug(pprint(factb2b_dict))
                     #sys.exit()
 
@@ -218,7 +219,8 @@ class FilconadObj(object):
                 #print fobjrow,fobjrow.doc_num                
                 DBSession.flush()             
                 log.debug("fact_b2b: processed doc #%s - ref #%s"%(fobjrow.doc_num,
-                                                                    fobjrow.rec_num))   
+                                                                    fobjrow.rec_num)) 
+                row += 1  
         transaction.commit()
         #sys.exit()
         #index = out_dict.keys()

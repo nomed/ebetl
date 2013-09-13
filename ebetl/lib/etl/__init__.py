@@ -43,10 +43,10 @@ class Mapper(object):
     def get_discount(self, value):
         return get_discount_from_string(value)       
     def get_cost_center(self, value)  :
-        return  value.strip()     
+        return  value.strip()
     def get_aammdd(self, value)  :
-	d = datetime.strptime(value, "%y%m%d").date()
-	return  datetime.combine(d, time())
+        d = datetime.strptime(value, "%y%m%d").date()
+        return  datetime.combine(d, time())
     def get_vat(self, value)  :
         return  int(value)
         
