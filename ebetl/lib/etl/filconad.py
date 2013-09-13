@@ -159,7 +159,6 @@ class FilconadObj(object):
         log.info("input_b2b: found %s to process"%(len(files)))  
             
         for fobj in files:
-        
             
             results = self.get_data(pricelist, fobj.b2b_id, fobj.content.splitlines())
             
@@ -221,6 +220,9 @@ class FilconadObj(object):
                 log.debug("fact_b2b: processed doc #%s - ref #%s"%(fobjrow.doc_num,
                                                                     fobjrow.rec_num)) 
                 row += 1  
+            fobj.processed = 1
+            DBSession.add(fobj)  
+            DBSession.flush()              
         transaction.commit()
         #sys.exit()
         #index = out_dict.keys()
