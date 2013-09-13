@@ -210,17 +210,5 @@ FACT_B2B_PRICE =  [
         label('diff_unit_price',  func.avg(
             Factb2b.b2b_unit_price - lis_fp ))
         ]      
-
-
-class Factrvcsales(DeclarativeBase):
-    """
-    Fact: Daily Trading Report - RVC Sales by Major Group
-    """
-    __tablename__ = 'fact_dtrrvcsales'
-    dtrrvcsale_id = Column(BigInteger, count_b2b, autoincrement=True, primary_key=True) 
-    logicdelete = Column(DateTime)
-    sincrofield = Column(BigInteger, contasincrofield , autoincrement=True)
-    sincroserverfield = Column(BigInteger)  
-    instablog = Column(BigInteger)  
-    updtablog = Column(BigInteger)      
+   
      
