@@ -133,8 +133,8 @@ class FilconadObj(object):
             DBSession.flush()
             bkpath = os.path.join(self.path_output, 
                                         str(fobj.b2b_id).zfill(8)+'txt')
-            log.debug("path_output: ", self.path_output)
-            log.debug("bkpath: ", bkpath)
+            log.debug("path_output: " + self.path_output)
+            log.debug("bkpath: " + bkpath)
             os.rename(fpath, bkpath)
                                                 
         transaction.commit()
