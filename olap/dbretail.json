@@ -1,0 +1,161 @@
+{
+    "dimensions": [
+        {
+            "name": "document", 
+            "attributes": ["id", "number"],
+            "levels": [
+                {
+                    "name":"movcode",
+                    "attributes": ["movcode"]
+                },            
+                {
+                    "name":"type",
+                    "attributes": ["type"]
+                },
+
+                {
+                    "name":"source_type",
+                    "attributes": ["source_type"]
+                },   
+
+                {
+                    "name":"date",
+                    "attributes": ["date", "source"]
+                }                                                  
+            ]
+        
+        
+        },
+        {
+            "name": "date", 
+            "levels": [
+                {
+                    "name":"year",
+                    "attributes": ["year"]
+                },
+                {
+                    "name":"month",
+                    "attributes": ["month"]
+                },
+                {
+                    "name":"week",
+                    "attributes": ["week"]
+                }            
+            ]
+        
+        
+        },
+        
+        {
+        	"name": "product", 
+        	"levels": [
+        			{
+        				"name": "category", 
+        				"attributes": [
+        				    {"name":"category_id"}, 
+        				    {"name":"category_name", "order": "asc"}
+        				    ]
+        			} ,
+        			{
+                    "name":"product",
+                    "attributes": [
+                        {"name":"id"},
+                        {"name":"name", "order": "asc"}
+                        ]
+                	}        			  	        			    			
+        		]
+        	},        
+        
+        {
+            "name": "date2", 
+            "levels": [
+                {
+                    "name":"year",
+                    "attributes": ["year"]
+                },
+                {
+                    "name":"month",
+                    "attributes": ["month"]
+                },
+                {
+                    "name":"day",
+                    "attributes": ["day"]
+                }            
+            ]
+        
+        
+        },
+        {
+            "name": "movval"        
+        },    
+        {
+            "name": "movcode"        
+        },    
+        {
+            "name": "type"        
+        }                         
+                 
+    ],
+    "cubes": [
+        {
+            "fact": "movimentir",        
+            "name": "movs",
+            "key": "numerorigamovimento",
+            "dimensions": [
+                            "document", 
+                            "date", 
+                            "product", 
+                            "movval", 
+                            "movcode",
+                            "type"
+                           ],
+            "measures": ["row_net_total","row_gross_total", "gross_total", "net_total"],
+            "mappings": {
+                "row_net_total": "totalenetto",
+                "row_gross_total": "totale",
+                "gross_total": "movimentit.totaledocumento",     
+                "net_total": "movimentit.totaleimponibile", 
+                "movcode": "movimentit.codicemovimento",
+                "type": "movimentit.tipodocumento",
+                "qty": "qtamovimento",
+                "gross_price": "prezzolistino",
+                "test": "qtamovimento*prezzolistino",                                
+                "discount_gross_price": "prezzo",
+                
+                "document.number": "movimentit.numerodocumento",
+                "document.id": "movimentit.numeromovimento",
+                "document.type": "movimentit.tipodocumento",
+                "document.movcode": "movimentit.codicemovimento",
+                "document.source": "movimentit.provenienza",
+                "document.source_type": "movimentit.tipoprovenienza",    
+                "document.date": "movimentit.datadocumento",                            
+                
+                "date.year": "movimentit.anno",         
+                "date.month": "movimentit.mese",         
+                "date.week": "movimentit.settimana" , 
+    		    
+                "product.id": "movimentir.idprodotto",
+                "product.name": "movimentir.descrizione",
+                "product.category_id": "reparti.numeroreparto",
+                "product.category_name": "reparti.reparto",
+    		    
+    		    "date2.year": {"column":"datadocumento", "extract":"year"},
+                "date2.month": {"column":"datadocumento", "extract":"month"},
+                "date2.day": {"column":"datadocumento", "extract":"day"}
+            },
+             "joins": [
+                {
+                    "master": "movimentir.numeromovimento",
+                    "detail": "movimentit.numeromovimento"
+                },
+                {
+                    "master": "movimentir.numeroreparto",
+                    "detail": "reparti.numeroreparto"
+                }                
+                
+             ]            
+        }
+
+    ]
+   
+}
