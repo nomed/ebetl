@@ -9,8 +9,10 @@ from hashlib import sha256
 #__all__ = ['User', 'Group', 'Permission']
 
 from sqlalchemy import Table, ForeignKey, Column, Sequence, and_, or_
-from sqlalchemy.types import Unicode, Integer, DateTime, Float, String, BLOB
+from sqlalchemy.types import Unicode, Integer, BigInteger, DateTime, Float, String, Date, BLOB
 from sqlalchemy.orm import relation, synonym, backref
+from sqlalchemy.sql import label
+from sqlalchemy import func
 from ebetl.model import DeclarativeBase, metadata, DBSession
 
 from sprox.fillerbase import TableFiller
@@ -29,6 +31,8 @@ contarigainventario = Sequence('contarigainventario')
 contarigainventarioconta = Sequence('contarigainventarioconta')
 contaautoean = Sequence('contaautoean')
 contab2b = Sequence('contab2b')
+
+count_b2b = Sequence('count_b2b')
 
 class Magazzini(DeclarativeBase):
     __tablename__ = 'magazzini'
@@ -696,8 +700,8 @@ class Inputb2b(DeclarativeBase):
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
     sincroserverfield = Column(Integer)
     b2b_id = Column(Integer, contab2b,  autoincrement=True,primary_key=True) 
-    supplier_id = Column(Integer, ForeignKey('provenienze.numeroprovenienza'))  
-    supplier = relation('Provenienze')
+    supplier_id = Column(Integer, ForeignKey(Provenienze.numeroprovenienza))  
+    supplier = relation(Provenienze)
     supplier_code = Column(String(50))
     record = Column(String(50))    
     filename = Column(String(50))
@@ -706,4 +710,11 @@ class Inputb2b(DeclarativeBase):
     acquired = Column(DateTime, default=datetime.now())
     updated = Column(DateTime, default = datetime.now())
     
-    
+  
+  
+  
+
+
+
+   
+         

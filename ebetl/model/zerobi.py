@@ -18,7 +18,7 @@ from ebetl.model import DeclarativeBase, metadata, DBSession, contasincrofield
 from sprox.fillerbase import TableFiller
 from sprox.tablebase import TableBase
 
-from ebetl.model import Inputb2b
+from ebetl.model import *
 
 count_cogs = Sequence('count_cogs')
 count_b2b = Sequence('count_b2b')
@@ -133,21 +133,23 @@ class Factcogs(DeclarativeBase):
     cost = Column(Float)
 
 
-
-
 class Factb2b(DeclarativeBase):
     """
     http://en.wikipedia.org/wiki/Cost_of_goods_sold
     """
     __tablename__ = 'fact_b2b'
+    print type(Provenienze)
+    print dir(Provenienze)
     b2b_id = Column(BigInteger, count_b2b, autoincrement=True, primary_key=True)
-    inputb2b_id = Column(Integer)#, ForeignKey('input_b2b.b2b_id'))   
+    inputb2b_id = Column(Integer, ForeignKey('input_b2b.b2b_id'))   
+    inputb2b = relation(Inputb2b)
     logicdelete = Column(DateTime)
     sincrofield = Column(BigInteger, contasincrofield , autoincrement=True)
     sincroserverfield = Column(BigInteger)  
     instablog = Column(BigInteger)  
     updtablog = Column(BigInteger)      
-    supplier_id = Column(BigInteger)    
+    supplier_id = Column(BigInteger, ForeignKey('provenienze.numeroprovenienza')) 
+    supplier = relation(Provenienze)   
     header = Column(String(20))
     row = Column(String(20))
     doc_num = Column(String(20))
@@ -210,5 +212,3 @@ FACT_B2B_PRICE =  [
         label('diff_unit_price',  func.avg(
             Factb2b.b2b_unit_price - lis_fp ))
         ]      
-   
-     
