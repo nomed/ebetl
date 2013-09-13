@@ -1,0 +1,4 @@
+recursive-include ebetl/public *
+include ebetl/public/favicon.ico
+recursive-include ebetl/i18n *
+recursive-include ebetl/templates *
