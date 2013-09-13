@@ -132,7 +132,7 @@ class FilconadObj(object):
             DBSession.add(fobj)
             DBSession.flush()
             bkpath = os.path.join(self.path_output, 
-                                        str(fobj.b2b_id).zfill(8)+'txt')
+                                        str(fobj.b2b_id).zfill(8)+'.txt')
             log.debug("path_output: " + self.path_output)
             log.debug("bkpath: " + bkpath)
             os.rename(fpath, bkpath)
@@ -165,7 +165,7 @@ class FilconadObj(object):
             
             log.debug("")
             log.info("input_b2b: id %s with %s results"%(fobj.b2b_id, len(results)))
-            
+            row = 1
             for res in results:
                 factb2b_dict = {}
 
@@ -177,21 +177,33 @@ class FilconadObj(object):
                         log.debug("fact_b2b: %s | %s | %s | %s => %s"%(
                                     src, func, key, res[src], newval       
                         ))
+                # probably skip if doc exists
+                and_c = and_(
+                                 Factb2b.supplier_id==factb2b_dict['supplier_id'],
+                                 Factb2b.inputb2b_id==factb2b_dict['inputb2b_id'],
+                                 Factb2b.header==factb2b_dict['header'],
+                                 Factb2b.doc_num==factb2b_dict['doc_num'],
+                                 Factb2b.rec_num==factb2b_dict['rec_num'],
+                                 Factb2b.b2b_sale_type==factb2b_dict['b2b_sale_type'],
+                                 Factb2b.b2b_code==factb2b_dict['b2b_code'],
+                                 Factb2b.row==factb2b_dict['row'],
+                                 )  
+                factb2b_dict['row']=row
                 try:
-                    # probably skip if doc exists
-                    and_c = and_(
-                                     Factb2b.supplier_id==factb2b_dict['supplier_id'],
-                                     Factb2b.inputb2b_id==factb2b_dict['inputb2b_id'],
-                                     Factb2b.header==factb2b_dict['header'],
-                                     Factb2b.doc_num==factb2b_dict['doc_num'],
-                                     Factb2b.rec_num==factb2b_dict['rec_num'],
-                                     )
+
                     fobjrow = DBSession.query(Factb2b).filter(*and_c).one()
-                    log.debug("fact_b2b: found row id"%(fobjrow.b2b_id))
+                    log.debug("fact_b2b: found row id %s"%(fobjrow.b2b_id))
                                 
                 except:
-                    fobjrow = Factb2b()           
+
+                    fobjrows = DBSession.query(Factb2b).filter(*and_c).all()
+                    for fobj in fobjrows:
+                        log.debug("Error on b2b_code: %s rec_num %s sale_type %s"%(
+                                    fobj.b2b_code, fobj.rec_num, fobj.b2b_sale_type) )      
+                    raise
+                    fobjrow = Factb2b()  
                     log.debug("fact_b2b: row NOT found")
+                                        
                     from pprint import pprint
                     #log.debug(pprint(factb2b_dict))
                     #sys.exit()

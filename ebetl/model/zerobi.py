@@ -138,8 +138,6 @@ class Factb2b(DeclarativeBase):
     http://en.wikipedia.org/wiki/Cost_of_goods_sold
     """
     __tablename__ = 'fact_b2b'
-    print type(Provenienze)
-    print dir(Provenienze)
     b2b_id = Column(BigInteger, count_b2b, autoincrement=True, primary_key=True)
     inputb2b_id = Column(Integer, ForeignKey('input_b2b.b2b_id'))   
     inputb2b = relation(Inputb2b)
