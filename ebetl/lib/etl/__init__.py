@@ -29,6 +29,9 @@ class Mapper(object):
             value = strip_non_ascii(value)
             value = value.decode("utf-8")
         return str(value).strip()
+    def get_zfill6(self,value):
+        ret = self.get_strip(value)
+        return ret.zfill(6)
     def get_x1000(self,value):
         return float(value)/1000
     def get_x100(self,value):
@@ -39,7 +42,10 @@ class Mapper(object):
         except:
             return 0
     def get_float(self, value):
-        return float(value)
+        try:
+            return float(value)       
+        except:
+            return 0
     def get_discount(self, value):
         return get_discount_from_string(value)       
     def get_cost_center(self, value)  :

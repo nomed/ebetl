@@ -15,6 +15,11 @@ DBSession.query(Prodotti).join(Inventarir).join(Inventarirconta).filter(Inventar
 
 """
 
+import logging, os, re, sys
+logging.basicConfig(
+    level=logging.DEBUG)
+log = logging.getLogger('ebetl.views')
+
 
 def get_stock(id, *args, **kw):
     """
@@ -59,42 +64,47 @@ def get_pricelist(id, date=None, *args, **kw):
                             Listiniprovenienze  
                             )
     ret = ret.join(Prodotti, Prodottiprovenienze.numeroprodotto == Prodotti.numeroprodotto)
-    ret = ret.join(Listiniprovenienze, and_(
-                    Listiniprovenienze.validodal <= date,
-                    Listiniprovenienze.validoal > date,
+    ret = ret.outerjoin(Listiniprovenienze, and_(
+                    #Listiniprovenienze.validodal <= date,
+                    #Listiniprovenienze.validoal > date,
                     Listiniprovenienze.numeroprovenienza == id,
                     Listiniprovenienze.numeroprodottoprovenienza == Prodottiprovenienze.numeroprodottoprovenienza) )   
     #ret = ret.join(Reparti, Prodotti.numeroreparto == Reparti.numeroreparto)
     ret = ret.filter(Prodottiprovenienze.numeroprovenienza==id)
-
     ret = ret.all()
+ 
     return ret
     
 def get_pricelist_todict(plist_obj, prov):
     """
     Get pricelist by supplier_code
     """
+   
     pricelist = {}
     for p in plist_obj:
         ret_tmp = {} 
         ret_tmp['prodottiprovenienze.numeroprovenienza'] = prov.numeroprovenienza
+  
         for obj in p:
             newobjs = [obj]
-            if obj.__tablename__ == 'prodotti':
-                if obj.reparto:
-                    newobjs.append(obj.reparto)
-                if obj.iva:
-                    newobjs.append(obj.iva)
-                if obj.reparto.contocosto:
-                    newobjs.append(obj.reparto.contocosto)
-            elif obj.__tablename__ == 'prodottiprovenienze':
-                newobjs.append(obj.ean)
-            for pobj in newobjs:
-                prefix = pobj.__tablename__                    
-                for key, val in pobj.__dict__.iteritems():
-                    if not key.startswith('_'):
-                        ret_tmp["%s.%s"%(prefix, key)] = val
+            if hasattr(obj, '__tablename__'):
+                if obj.__tablename__ == 'prodotti':
+                    if obj.reparto:
+                        newobjs.append(obj.reparto)
+                    if obj.iva:
+                        newobjs.append(obj.iva)
+                    if obj.reparto.contocosto:
+                        newobjs.append(obj.reparto.contocosto)
+                elif obj.__tablename__ == 'prodottiprovenienze':
+                    newobjs.append(obj.ean)
+                for pobj in newobjs:
+                    prefix = pobj.__tablename__                    
+                    for key, val in pobj.__dict__.iteritems():
+                        if not key.startswith('_'):
+                            ret_tmp["%s.%s"%(prefix, key)] = val               
+ 
         pricelist[ret_tmp['prodottiprovenienze.codiceprodottoprovenienza']]=ret_tmp
+        #sys.exit() 
     return pricelist
     
 def get_latest_cogs(prod_id, cost_center_id, date=None):

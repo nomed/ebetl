@@ -1,0 +1,41 @@
+header,1,2,2,tipo_record,Tipo Record,Costante = 01
+header,3,7,5,index,Numero Progressivo,
+header,8,13,6,doc_num,Numero Fattura,Numero di fattura/Numero della nota di credito del fornitore.
+header,14,19,6,doc_date,Data Fattura (aammgg),nuovo D.d.T.
+header,20,25,6,rec_num,Numero del DDT,
+header,26,31,6,rec_date,Data del DDT,
+header,32,46,15,sup_code,Codice Fornitore,
+header,47,47,1,sup_code_type,Tipo Codice Fornitore,
+header,48,62,15,sup_cust_code,,
+header,63,77,15,sup_coop_code,Codice Cooperativo,
+header,78,92,15,cost_center_code,Codice Socio,
+header,93,93,1,cost_center_code_type,Tipo Codice Socio,
+header,94,94,1,doc_type,Tipo Documento,F:fattura N:nota di credito 
+header,95,97,3,curr_code,,EUR
+header,98,122,25,filler,,blank
+header,123,128,6,reserved,,blank
+body,1,2,2,tipo_record,,
+body,3,7,5,index,,
+body,8,22,15,ref_code,,
+body,23,52,30,ref_desc,,
+body,53,54,2,uom,Unita di fatturazione,Unita di misura
+body,55,61,7,uom_qty,Quantità x 100, Quantita fatturata in uom
+body,62,70,9,unit_price,Prezzo x 1000,"Valore unitario netto in Euro del prodotto, espresso per l'unita' di misura (al netto di tutti gli sconti che compaiono in fattura)."
+body,71,79,9,total,Totale x 1000,"valore unitario netto in Euro del prodotto, espresso per l'unita' di misura (al netto di tutti gli sconti che compaiono in fattura)."
+body,80,83,4,qty,Numero pezzi,Indica il numero di elementi per le quantità misurabili anche in pezzi.
+body,84,84,1,vat_type,Tipo IVA,: Soggetto ad aliquota normale | 1: Esente | 2: Escluso
+body,85,86,2,vat_code,Codice IVA,Codice aliquota iva prodotto
+body,87,87,1,mov_type,Tipo Movimento,0:Merce | 1: Consegna | 2 : Reso cauzione
+body,88,88,1,sale_type,Tipo cessione,1: Vendita Merce | 2 Vendita attrezzatura | 3: Servizi | 6: Omaggio | 7: Sconto merce con IVA | 8: Sconto merce no iva | 9: Cauzione
+body,89,94,6,ord_num,,
+body,95,96,2,pricelist_code,,
+body,97,97,1,ref_code_type,,
+body,98,98,1,contract_type,,
+body,99,99,1,other,,
+body,100,104,5,cost,Costo trasporto x 1000,
+body,105,105,1,account_code,,
+body,106,106,1,return_type,,
+body,107,113,7,catalogue_price,,
+body,114,116,3,filler,,
+body,117,122,6,ord_date,,
+body,123,128,6,reserved,,

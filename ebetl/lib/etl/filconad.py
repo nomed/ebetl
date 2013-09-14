@@ -22,7 +22,7 @@ from ebetl.lib.etl import Mapper
 from ebetl.lib import strip_non_ascii
 
 from itertools import groupby
-
+from pprint import pprint
 
     
 
@@ -64,7 +64,7 @@ class FilconadObj(object):
 
         self.path_jsonmap = os.path.join(
                         os.path.dirname(os.path.realpath(self.path)),
-                        'mappers', "filconad.json"
+                        'mappers', "%s_target.json"%record
                         )
         jsonf = open(self.path_jsonmap , "r" )  
         self.jsonmap = json.load(jsonf)
@@ -98,11 +98,14 @@ class FilconadObj(object):
                     txn = get_txn(keys, body, r)
                     txn.update(h_txn)
                     b_ref_code = txn.get('b_ref_code')
-                    b_ref_code = b_ref_code.strip()
+                    # TODO : support not 6 len char sup code
+                    # if b_ref_code is 1 and not 000001 
+                    # account_code can't be found !!!!!
+                    b_ref_code = b_ref_code.strip().zfill(6)
 
                     if  b_ref_code in pricelist.keys():
                         txn.update(pricelist[b_ref_code])
-
+                    log.debug([b_ref_code])
                     ret.append(txn) 
                              
         return ret
@@ -111,19 +114,20 @@ class FilconadObj(object):
 
     def store_files(self, *args, **kw):
         files = self._get_files()
-        p = DBSession.query(Provenienze).filter(
-                Provenienze.codiceprovenienza==self.prov).one()         
+        prov = DBSession.query(Provenienze).filter(
+                Provenienze.codiceprovenienza==self.prov,
+                Provenienze.tipoprovenienza=="FOR").one()        
         for fpath in files:
 
             fname = os.path.basename(fpath)
             try:
                 fobj = DBSession.query(Inputb2b).filter(
                     and_(Inputb2b.filename==fname,
-                        Inputb2b.supplier_id==p.numeroprovenienza)
+                        Inputb2b.supplier_id==prov.numeroprovenienza)
                 ).one()
             except:
                 fobj = Inputb2b()                
-                fobj.supplier_id=p.numeroprovenienza
+                fobj.supplier_id=prov.numeroprovenienza
             fobj.supplier_code=self.prov    
             fobj.filename = fname
             fobj.record = self.record
@@ -145,28 +149,35 @@ class FilconadObj(object):
         """
         # get prov obj
         prov = DBSession.query(Provenienze).filter(
-                Provenienze.codiceprovenienza==self.prov).one()     
+                Provenienze.codiceprovenienza==self.prov,
+                Provenienze.tipoprovenienza=="FOR").one()     
         # get files to process
         files = DBSession.query(Inputb2b).filter(
                     and_(Inputb2b.supplier_id==prov.numeroprovenienza,
                          Inputb2b.processed == 0)
                 ).order_by(Inputb2b.acquired).all()
-        # get current procelist linked to supplier
-        pricelist_tmp = get_pricelist(prov.numeroprovenienza)
-        # create a dict indexed by supplier_code
-        pricelist = get_pricelist_todict(pricelist_tmp, prov)
+
         
         log.info("input_b2b: found %s to process"%(len(files)))  
-            
+        pricelist_tmp = None
+        pricelist = None    
         for fobj in files:
+
+            # get current procelist linked to supplier
+            if not pricelist_tmp:
+                pricelist_tmp = get_pricelist(prov.numeroprovenienza)
+            # create a dict indexed by supplier_code
+            if not pricelist:
+                pricelist = get_pricelist_todict(pricelist_tmp, prov)
             
-            results = self.get_data(pricelist, fobj.b2b_id, fobj.content.splitlines())
-            
+            results = self.get_data(pricelist, fobj.b2b_id, fobj.content.splitlines())            
             log.debug("")
             log.info("input_b2b: id %s with %s results"%(fobj.b2b_id, len(results)))
+            
             row = 1
             for res in results:
                 factb2b_dict = {}
+                factb2b_dict['supplier_id'] = prov.numeroprovenienza
 
                 for key, val in self.jsonmap.iteritems():
                     src, func = val
@@ -174,8 +185,14 @@ class FilconadObj(object):
                         newval = getattr(mapper, func)(res[src])
                         factb2b_dict[key] = newval
                         log.debug("fact_b2b: %s | %s | %s | %s => %s"%(
-                                    src, func, key, res[src], newval       
+                                    src, func, key, res[src], [newval]
                         ))
+                    else:
+                        #log.debug("%s"%(pprint(pricelist)))
+                        log.debug("not found: %s [%s]"%(src, key))                        
+                #log.debug(res)
+                #sys.exit()
+
                 # probably skip if doc exists
                 factb2b_dict['row']=row                
                 and_c = and_(
@@ -208,11 +225,11 @@ class FilconadObj(object):
                     #log.debug(pprint(factb2b_dict))
                     #sys.exit()
 
-                setattr(fobjrow, "account_code", self.config.get("%s.notfound"%(self.record)) )
+                #setattr(fobjrow, "account_code", self.config.get("%s.notfound"%(self.record)) )
 
                 for key, val in factb2b_dict.iteritems():                        
                     setattr(fobjrow, key, val)
-                    
+
                 DBSession.add(fobjrow) 
                 
                 #print fobjrow,fobjrow.doc_num                
