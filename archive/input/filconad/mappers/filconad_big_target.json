@@ -31,6 +31,10 @@
         "prodotti.prodotto", 
         "get_strip"
     ], 
+    "b2b_unit_pricedb": [
+        "b_unit_price", 
+        "get_x1000"
+    ], 
     "account_id": [
         "conticontabilita.numerocontocontabilita", 
         "get_strip"

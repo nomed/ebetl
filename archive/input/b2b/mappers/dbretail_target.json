@@ -1,138 +1,142 @@
 {
     "b2b_sale_type": [
-        "b_sale_type", 
+        "movimentir.tipoprodotto", 
         "get_int"
     ], 
     "fam_code": [
         "reparti.codicereparto", 
-        "get_strip"
+        "get_obj"
     ], 
     "item_plu": [
         "eanprodotti.codicebilancia", 
-        "get_strip"
+        "get_obj"
     ], 
     "supplier_item_discount": [
         "listiniprovenienze.stvariazionenetto", 
         "get_discount"
     ], 
     "cost_center_code": [
-        "h_sup_cust_code", 
+        "magazzini.codicemagazzino", 
         "get_cost_center"
     ], 
     "item_ean": [
         "eanprodotti.ean", 
-        "get_strip"
+        "get_obj"
     ], 
     "header": [
-        "h_index", 
-        "get_strip"
+        "movimentit.numeromovimento", 
+        "get_obj"
     ], 
     "item_desc": [
         "prodotti.prodotto", 
-        "get_strip"
+        "get_obj"
     ], 
     "account_id": [
         "conticontabilita.numerocontocontabilita", 
-        "get_strip"
+        "get_obj"
     ], 
     "fam_id": [
         "reparti.numeroreparto", 
-        "get_int"
+        "get_obj"
     ], 
     "supplier_id": [
         "prodottiprovenienze.numeroprovenienza", 
-        "get_int"
+        "get_obj"
     ], 
     "account_desc": [
         "conticontabilita.contocontabilita", 
-        "get_strip"
+        "get_obj"
     ], 
     "b2b_uom_qty": [
-        "b_uom_qty", 
-        "get_x100"
+        "movimentir.qtamovimento", 
+        "get_obj"
     ], 
     "b2b_uom": [
-        "b_uom", 
-        "get_strip"
+        "movimentir.numerounitamisura", 
+        "get_obj"
     ], 
     "supplier_item_code": [
         "prodottiprovenienze.codiceprodottoprovenienza", 
-        "get_strip"
+        "get_obj"
     ], 
     "fam_desc": [
         "reparti.reparto", 
-        "get_strip"
+        "get_obj"
     ], 
     "b2b_desc": [
-        "b_ref_desc", 
-        "get_strip"
+        "movimentir.descrizione", 
+        "get_obj"
     ], 
     "row": [
-        "b_index", 
-        "get_strip"
+        "movimentir.numerorigamovimento", 
+        "get_obj"
     ], 
     "b2b_code": [
-        "b_ref_code", 
-        "get_strip"
+        "prodottiprovenienze.codiceprodottoprovenienza", 
+        "get_obj"
     ], 
     "rec_date": [
-        "h_rec_date", 
-        "get_aammdd"
+        "movimentit.datadocumento", 
+        "get_obj"
     ], 
     "b2b_net_total": [
-        "b_total", 
-        "get_x100"
+        "movimentir.totalenetto", 
+        "get_obj"
     ], 
     "supplier_item_unit_price": [
         "listiniprovenienze.prezzonetto", 
-        "get_float"
+        "get_obj"
+    ], 
+    "b2b_disc": [
+        "movimentir.stvariazionenetto", 
+        "get_discount"
     ], 
     "rec_num": [
-        "h_rec_num", 
-        "get_strip"
+        "movimentit.numerodocumento", 
+        "get_obj"
     ], 
     "item_code": [
         "prodotti.codiceprodotto", 
-        "get_strip"
+        "get_obj"
     ], 
     "b2b_vat_code": [
-        "b_vat_code", 
+        "iva.codiceiva", 
         "get_vat"
     ], 
     "b2b_qty": [
-        "b_qty", 
-        "get_float"
+        "movimentir.movqta", 
+        "get_obj"
     ], 
     "doc_date": [
-        "h_doc_date", 
-        "get_aammdd"
+        "movimentit.datadocumento", 
+        "get_obj"
     ], 
     "item_id": [
         "prodotti.numeroprodotto", 
-        "get_int"
+        "get_obj"
     ], 
     "item_conf": [
         "prodotti.pezzixcollo", 
-        "get_strip"
+        "get_obj"
     ], 
     "doc_num": [
-        "h_doc_num", 
-        "get_strip"
+        "movimentit.numerodocumento", 
+        "get_obj"
     ], 
     "b2b_unit_price": [
-        "b_unit_price", 
-        "get_x10000"
+        "movimentir.prezzonetto", 
+        "get_obj"
     ], 
     "b2b_mov_type": [
-        "b_mov_type", 
+        "movimentir.tiporiga", 
         "get_int"
     ], 
     "inputb2b_id": [
-        "inputb2b_id", 
-        "get_int"
+        "movimentit.numeromovimento", 
+        "get_obj"
     ], 
     "account_code": [
         "conticontabilita.codicecontocontabilita", 
-        "get_strip"
+        "get_obj"
     ]
 }

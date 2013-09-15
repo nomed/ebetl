@@ -19,12 +19,12 @@ class Mistral(Command):
     usage = "--NO USAGE--"
     group_name = "ebetl.export"
     parser = Command.standard_parser(verbose=False)
-    parser.add_option("-r", "--run",
-                      action="store_true", dest="run",
-                      help="")
-    parser.add_option("-p", "--pc",
-                  action="store_true", dest="pc",
-                  help="")
+    #parser.add_option("-r", "--run",
+    #                  action="store_true", dest="run",
+    #                  help="")
+    #parser.add_option("-p", "--pc",
+    #              action="store_true", dest="pc",
+    #              help="")
     parser.add_option("-x", "--x",
                   action="store_true", dest="export",
                   help="")                 
@@ -36,13 +36,13 @@ class Mistral(Command):
             mistralobj=Db2Mistral(config)
             mistralobj.write_out()
             #set_account_from_rep2()
-        if self.options.pc:
-            #mistralobj=Db2Mistral(config)
-            set_account_from_rep2()            
-        if self.options.run:
-            mistralobj=MistralObj(config, pc=self.options.pc)
-            mistralobj.write_out()
-            print 'done'
+        #if self.options.pc:
+        #    #mistralobj=Db2Mistral(config)
+        #    set_account_from_rep2()            
+        #if self.options.run:
+        #    mistralobj=MistralObj(config, pc=self.options.pc)
+        #    mistralobj.write_out()
+        #    print 'done'
         
              
         

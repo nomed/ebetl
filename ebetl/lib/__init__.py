@@ -47,14 +47,17 @@ def get_discount_from_string(dstr):
     
     """
     # list of discount integer values
-    dvals = dstr.split('+')
+    if dstr:
+        dvals = dstr.split('+')
     
-    # find the value to multiply for unit price
-    mult = 1
-    for d in dvals:
-        d = d.strip()
-        if d:
-            mult = (1 - float(d)/100)*mult
+        # find the value to multiply for unit price
+        mult = 1
+        for d in dvals:
+            d = d.strip().replace(',','.')
+            if d:
+                mult = (1 - float(d)/100)*mult
+    else:
+        mult = 1
     return mult
 
    
