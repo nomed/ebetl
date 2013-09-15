@@ -98,6 +98,7 @@ def get_pricelist_todict(plist_obj, prov):
                 elif obj.__tablename__ == 'prodottiprovenienze':
                     newobjs.append(obj.ean)
                 for pobj in newobjs:
+                    print pobj
                     prefix = pobj.__tablename__                    
                     for key, val in pobj.__dict__.iteritems():
                         if not key.startswith('_'):
