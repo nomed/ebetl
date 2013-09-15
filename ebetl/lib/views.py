@@ -96,7 +96,8 @@ def get_pricelist_todict(plist_obj, prov):
                     if obj.reparto.contocosto:
                         newobjs.append(obj.reparto.contocosto)
                 elif obj.__tablename__ == 'prodottiprovenienze':
-                    newobjs.append(obj.ean)
+                    if obj.ean:
+                        newobjs.append(obj.ean)
                 for pobj in newobjs:
                     print pobj
                     prefix = pobj.__tablename__                    
