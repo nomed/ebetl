@@ -23,8 +23,9 @@ from ebetl.lib import get_discount_from_string
 from ebetl.lib import strip_non_ascii
 
 class Mapper(object):
-    def get_strip(self, value):
-        
+    def get_obj(self, value):
+        return value
+    def get_strip(self, value):       
         if not type(value) in [int, float]:
             value = strip_non_ascii(value)
             value = value.decode("utf-8")
@@ -34,6 +35,8 @@ class Mapper(object):
         return ret.zfill(6)
     def get_x1000(self,value):
         return float(value)/1000
+    def get_x10000(self,value):
+        return float(value)/10000        
     def get_x100(self,value):
         return float(value)/100        
     def get_int(self, value):
@@ -54,7 +57,10 @@ class Mapper(object):
         d = datetime.strptime(value, "%y%m%d").date()
         return  datetime.combine(d, time())
     def get_vat(self, value)  :
-        return  int(value)
+        try:
+            return  int(value)
+        except:
+            return 0
         
 
 class DBSession2(object):

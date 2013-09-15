@@ -73,6 +73,12 @@ setup(
     main = pylons.util:PylonsInstaller
     
     [paste.paster_command]
+    filconad = ebetl.commands.filconad:Filconad
+    mistral = ebetl.commands.mistral:Mistral   
+    b2b = ebetl.commands.b2b:B2b    
+    
+    
+    
     #fatmicro = ebetl.commands.fatmicro:Fatmicro
     #ftpacquire = ebetl.commands.ftpacquire:Ftpacquire
     #zipextract = ebetl.commands.zipextract:Zipextract
@@ -91,7 +97,7 @@ setup(
     #seedsfid = ebetl.commands.seedsfid:Seedsfid 
     #profis = ebetl.commands.profis:Profis
     #sisa = ebetl.commands.sisa:Sisa
-    #mistral = ebetl.commands.mistral:Mistral
+
     #fidelity= ebetl.commands.fidelity:Fidelity
     #acq_anag= ebetl.commands.acq_anagra00f:AcqAnagra00f
     #acq_listfor = ebetl.commands.acq_mgart00f:AcqMgart00f
@@ -101,8 +107,7 @@ setup(
     #big = ebetl.commands.listini.big:Big           
     #updateconti = ebetl.commands.updateconti:Updateconti
     #acqmonciotti = ebetl.commands.acqmonciotti:Acqmonciotti
-    #cei = ebetl.commands.cei:Cei    
-    filconad = ebetl.commands.filconad:Filconad  
+    #cei = ebetl.commands.cei:Cei      
     #syncdb = ebetl.commands.syncdb:Syncdb  
     #exportclifor = ebetl.commands.exportclifor:Exportclifor   
     #cleanupcar = ebetl.commands.cleanupcar:Cleanupcar

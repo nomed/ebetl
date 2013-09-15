@@ -171,8 +171,9 @@ class Factb2b(DeclarativeBase):
     supplier_item_unit_price = Column(Float)
     supplier_item_discount = Column(Float)
     b2b_code = Column(String(20))
-    b2b_desc = Column(String(50))
+    b2b_desc = Column(String(50))   
     b2b_unit_price = Column(Float)
+    b2b_disc = Column(Float, default=1)     
     b2b_vat_code = Column(Integer)
     b2b_uom = Column(String(2))
     b2b_uom_qty = Column(Float)    
@@ -184,14 +185,13 @@ class Factb2b(DeclarativeBase):
 
 
 # document final price
-doc_fp = Factb2b.supplier_item_unit_price * Factb2b.supplier_item_discount
 vat_total = Factb2b.b2b_net_total * Factb2b.b2b_vat_code/100
 gross_total = Factb2b.b2b_net_total + vat_total
 # pricelist final price
 lis_fp =  Factb2b.supplier_item_discount*Factb2b.supplier_item_unit_price
 # contract total
-lis_ct = Factb2b.supplier_item_unit_price * Factb2b.b2b_uom_qty
-
+lis_ct = lis_fp * Factb2b.b2b_uom_qty
+b2b_fp = Factb2b.b2b_unit_price*Factb2b.b2b_disc
 #measures
 FACT_B2B = [
         label('lines', func.count(Factb2b.b2b_id)),
@@ -200,13 +200,17 @@ FACT_B2B = [
         label('gross_total', func.sum(gross_total)),         
         label('lis_ct', func.sum(lis_ct)),
         label('disc', func.sum(
-            lis_ct - Factb2b.b2b_net_total 
+            Factb2b.b2b_net_total  - lis_ct
+            
         ))                                   
         ]
         
 FACT_B2B_PRICE =  [
-        label('unit_price', func.avg(Factb2b.b2b_unit_price)),
+        label('unit_price', func.avg(b2b_fp )),
         label('unit_price_contract', func.avg(lis_fp)),                
         label('diff_unit_price',  func.avg(
-            Factb2b.b2b_unit_price - lis_fp ))
+            b2b_fp - lis_fp )),
+        label('b2b_uom_qty', func.sum(Factb2b.b2b_uom_qty)),            
+        label('net_total',  func.sum(
+            Factb2b.b2b_net_total ))            
         ]      

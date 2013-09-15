@@ -51,7 +51,7 @@ TRACCIATO MR2MISTRAL
 import logging, os, re, sys
 logging.basicConfig(
     level=logging.DEBUG)
-log = logging.getLogger('cli00')
+log = logging.getLogger('mistral')
 #from ebtl.lib.etl.config import *
 from ebetl.lib.etl.config import _ensure_unicode
 from ebetl.lib.etl.config import movcode_labels
@@ -160,12 +160,17 @@ def set_account_from_rep2():
     transaction.commit()
 
 class Db2Mistral(object):
+    """
+    """
     def __init__(self, config, *args, **kw):
         self.config=config 
         self.codmov = config.get("mistral.write.codmov").split(',')   
         self.path_genshi=  config.get('mistral.path_genshi') 
         self.loader_genshi = TemplateLoader([self.path_genshi],
-                        auto_reload=True)                   
+                        auto_reload=True)   
+        log.debug("codmov: %s"%self.codmov)                                
+        log.debug("path_genshi: %s"%self.path_genshi)
+        #sys.exit()
         
     def get_h(self,data):
         """{
@@ -243,12 +248,34 @@ class Db2Mistral(object):
             r=r+" "*(255-len(r))+'*'
             ret_rows.append(r)
         return ret_rows
+
         
     def get_mov(self,codmov, *args, **kw):
         orlist = []
-        from datetime import datetime
-        datadoc_in=datetime(2013,2,28) 
-        datadoc_out=datetime(2013,4,1)
+        log.debug("get_mov: %s"%codmov)
+        for c in codmov:
+            orlist.append(Movimentit.codicemovimento==c)  
+        from pprint import pprint
+        tables = (Movimentit, Movimentir, Reparti, Prodotti)
+        columns = []
+        for m in tables:
+            for c in m.__table__.columns:
+                    if not c in columns:
+                        columns.append(c._label)
+        pprint(columns)
+        movst = DBSession.query(*tables)#, Prodotti, Eanprodotti, )
+        movst = movst.join(Movimentir, Movimentit.numeromovimento == Movimentir.numeromovimento)
+        movst = movst.filter(and_(or_(*orlist),
+                                  Movimentit.numerotipopagamento==1,)).order_by(
+                                                    Movimentit.datadocumento).all() 
+
+        sys.exit()
+
+        
+    def get_mov2(self,codmov, *args, **kw):
+        orlist = []
+        log.debug("get_mov: %s"%codmov)
+        sys.exit()
         for c in codmov:
             orlist.append(Movimentit.codicemovimento==c)
         movst = DBSession.query(Movimentit).filter(
@@ -339,12 +366,16 @@ class Db2Mistral(object):
         return ret
                
     def write_out(self,*args, **kw):
-        opath=self.config.get('mistral.path_output')
+        opath=self.config.get('mistral.path_output') 
+        log.debug("opath: %s"%(opath))
         fname=self.config.get('mistral.filename')
+        log.debug("fname: %s"%(fname))
         fout=os.path.join(opath,fname)
+        log.debug("fout: %s"%fout)
+        
         fobj=open(fout,'wr')
         ret = self.get_mov(self.codmov)
-        tmpl = self.loader_genshi.load('index.html')
+        #tmpl = self.loader_genshi.load('index.html')
         if True:
             for d in ret:
                 h=self.get_h(d)
@@ -358,12 +389,12 @@ class Db2Mistral(object):
                 for i in f:
                     print>>fobj, i
         fobj.close()
-        stream = tmpl.generate(ret=ret)
+        #stream = tmpl.generate(ret=ret)
                      
-        s = stream.render('html', doctype='html', encoding='utf-8')
-        output_html = open(opath+'MOVFAT.html', 'w')
+        #s = stream.render('html', doctype='html', encoding='utf-8')
+        #output_html = open(opath+'MOVFAT.html', 'w')
         
-        output_html.write(s)
+        #output_html.write(s)
         transaction.commit()
 
 class MistralObj(object):

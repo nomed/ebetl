@@ -24,11 +24,11 @@ supplier_item_unit_price,listiniprovenienze.prezzonetto,get_float
 supplier_item_discount,listiniprovenienze.stvariazionenetto,get_discount
 b2b_code,b_ref_code,get_strip
 b2b_desc,b_ref_desc,get_strip
-b2b_unit_price,b_unit_price,get_x1000
+b2b_unit_price,b_unit_price,get_x10000
 b2b_vat_code,b_vat_code,get_vat
 b2b_uom,b_uom,get_strip
 b2b_uom_qty,b_uom_qty,get_x100
 b2b_qty,b_qty,get_float
-b2b_net_total,b_total,get_x1000
+b2b_net_total,b_total,get_x10000
 b2b_sale_type,b_sale_type,get_int
 b2b_mov_type,b_mov_type,get_int

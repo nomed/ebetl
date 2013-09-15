@@ -19,7 +19,7 @@ import logging, os, re, sys
 logging.basicConfig(
     level=logging.DEBUG)
 log = logging.getLogger('ebetl.views')
-
+from sqlalchemy.orm import aliased
 
 def get_stock(id, *args, **kw):
     """
@@ -65,8 +65,8 @@ def get_pricelist(id, date=None, *args, **kw):
                             )
     ret = ret.join(Prodotti, Prodottiprovenienze.numeroprodotto == Prodotti.numeroprodotto)
     ret = ret.outerjoin(Listiniprovenienze, and_(
-                    #Listiniprovenienze.validodal <= date,
-                    #Listiniprovenienze.validoal > date,
+                    Listiniprovenienze.validodal <= date,
+                    Listiniprovenienze.validoal > date,
                     Listiniprovenienze.numeroprovenienza == id,
                     Listiniprovenienze.numeroprodottoprovenienza == Prodottiprovenienze.numeroprodottoprovenienza) )   
     #ret = ret.join(Reparti, Prodotti.numeroreparto == Reparti.numeroreparto)
@@ -146,4 +146,86 @@ def get_latest_fact_cogs(DBSession, prod_id, cost_center_id, date=None):
     else:
         return float(0)
     
+def get_mov(id, *args, **kw):
+    """
+    >>> codmov=['FACFOR', 'FATFOR']
+
+    """
+ 
+    from pprint import pprint
+
+    #contiricavo = aliased(Conticontabilita)
+
+    tables = (
+                Movimentit, 
+                Movimentir, 
+                Magazzini, 
+                Conticontabilita, 
+                Iva, 
+                Reparti, 
+                Prodotti, 
+                Eanprodotti, 
+                Prodottiprovenienze, 
+                Listiniprovenienze
+                )
+    columns = []
+    query_args = []
+    for m in tables:
+        for c in m.__table__.columns:
+                if not c in columns:
+                    columns.append("%s"%(c))
+                    query_args.append(c)
+
+
+    movst = DBSession.query(*query_args)#, Prodotti, Eanprodotti, )
+    movst = movst.filter(Movimentit.numeromovimento==id)  
+         
+
+    # movimentir
+    movst = movst.join(Movimentir,and_(
+                Movimentit.numeromovimento == Movimentir.numeromovimento,
+                Movimentir.tipoprodotto!="NIL") 
+                )
+               
+    # magazzini
+    movst = movst.outerjoin(Magazzini, Magazzini.numeromagazzino == Movimentir.numeromagazzino) 
+   
+    # conticosto
+    movst = movst.outerjoin(Conticontabilita, 
+            Conticontabilita.numerocontocontabilita==Movimentir.numerocontocontabilita)   
+    # iva
+    movst = movst.outerjoin(Iva, 
+            Iva.numeroiva==Movimentir.numeroiva)             
+    # reparti
+    movst = movst.outerjoin(Reparti, Reparti.numeroreparto==Movimentir.numeroreparto)    
+    # prodotti
+    movst = movst.outerjoin(Prodotti, Prodotti.numeroprodotto==Movimentir.idprodotto)
+    # eanprodotti
+    movst = movst.outerjoin(Eanprodotti, 
+            Eanprodotti.numeroeanprodotto==Movimentir.numeroeanprodotto)    
+    # prodottiprovenienza
+    movst = movst.outerjoin(Prodottiprovenienze, 
+            and_(Prodottiprovenienze.numeroeanprodotto==Movimentir.numeroeanprodotto,
+            
+                 Prodottiprovenienze.numeroprovenienza==Movimentit.numeroprovenienza,
+                 Prodottiprovenienze.codiceprodottoprovenienza==Movimentir.codice )
+                 )            
+    # listiniprovenienza
+       
+    movst = movst.outerjoin(Listiniprovenienze, 
+               and_(
+                    Listiniprovenienze.validodal <= Movimentit.datadocumento,
+                    Listiniprovenienze.validoal > Movimentit.datadocumento,
+                    Listiniprovenienze.numeroprovenienza == Movimentit.numeroprovenienza,
+     Listiniprovenienze.numeroprodottoprovenienza == Prodottiprovenienze.numeroprodottoprovenienza,
+     )
+                        )  
+             
+              
+    movst = movst.order_by(Movimentit.datadocumento)
+    
+    movst = movst.all() 
+    
+    ret = [dict(zip(columns, i)) for i in movst]
+    return ret
 
