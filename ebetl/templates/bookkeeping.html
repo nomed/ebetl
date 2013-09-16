@@ -97,9 +97,9 @@
     <tr py:for="row in results">
         <td>${[row[0].codiceprovenienza]}</td>
         <td>${[row[0].provenienza]}</td>
-        <td>${[format_date(row[1])]}</td>
-        <td class="text-right"><a href="/b2b/show/${row[0]}"> ${[row[2]]}</a></td>        
-        <td class="text-right" py:for="r in row[3:7]">${[todecimal(r)]}</td>                     
+        <td>${format_date(row[2])}</td>
+        <td class="text-right"><a href="/b2b/show/${row[1]}"> ${row[3]}</a></td>        
+        <td class="text-right" py:for="r in row[4:8]">${todecimal(r)}</td>                     
     </tr>
 
 
