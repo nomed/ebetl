@@ -1,0 +1,18 @@
+var jsonData = (function () {
+    var jsonData = [];
+    $.ajax({
+        'async': false,
+        'global': false,
+        'url': '/location/index.json',
+        'dataType': "json",
+        'success': function(string) {
+                    data = $.parseJSON(string);
+                    for (var i=0;i<data.data.length;i++)
+                        { 
+                        jsonData.push({id: data.data[i].location_id, 
+                            name: data.data[i].location_name});
+                        }
+                },
+    });
+    return json;
+})(); 

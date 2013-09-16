@@ -1,0 +1,111 @@
+# -*- coding: utf-8 -*-
+"""Main Controller"""
+import pylons
+from tg import expose, flash, require, url, lurl, request, redirect, tmpl_context
+from tg.i18n import ugettext as _, lazy_ugettext as l_
+from tg import predicates
+from ebetl import model
+from ebetl.controllers.secure import SecureController
+from ebetl.model import DBSession, metadata
+from tgext.admin.tgadminconfig import TGAdminConfig
+from tgext.admin.controller import AdminController
+from ebetl.lib.base import BaseController
+from ebetl.controllers.error import ErrorController
+from ebetl.model import *
+
+from ebetl.model.zerobi import FACT_B2B,FACT_B2B_PRICE
+
+
+from ebetl.lib import views
+from ebetl.lib.views import get_latest_cogs as gcogs
+from webhelpers import paginate
+from babel.numbers import format_currency, format_decimal
+from decimal import Decimal
+
+from sqlalchemy.sql import label
+from sqlalchemy import func
+
+try:
+    from collections import OrderedDict
+except:
+    from ordereddict import OrderedDict
+
+    
+__all__ = ['BookkeepingController']
+
+       
+
+class BookkeepingController(BaseController):
+    """    
+    Bookkeeping Controller
+    
+    http://en.wikipedia.org/wiki/Bookkeeping
+    
+    Bookkeeping in the context of a business is simply the recording of financial 
+    transactions. Transactions include 
+    
+    * purchases
+    * sales
+    * receipts
+    * payments 
+    
+    by an individual or organization. 
+    Many individuals mistakenly consider bookkeeping and accounting to be the 
+    same thing. 
+    
+    This confusion is understandable because the accounting process includes 
+    the bookkeeping function, but is just one part of the accounting process. 
+    
+    The accountant creates reports from the recorded financial transactions 
+    recorded by the bookkeeper and files forms with government agencies. 
+    
+    There are some common methods of bookkeeping such as the single-entry 
+    bookkeeping system and the double-entry bookkeeping system. 
+    
+    But while these systems may be seen as "real" bookkeeping, any process that 
+    involves the recording of financial transactions is a bookkeeping process.
+    
+    """
+    
+    def _datagrid(self, query_lst , groupby, fltr):
+        ret = DBSession.query(*query_lst)
+        #ret = ret.order_by(Factb2b.row)
+        ret = ret.group_by(*groupby).filter(and_(*fltr))
+        return ret.all()    
+    
+    @expose('ebetl.templates.bookkeeping')
+    def index(self):
+        """Handle the front-page."""
+        groupby = [Provenienze, Factb2b.doc_date, Factb2b.doc_num]
+        query_lst = groupby + FACT_B2B
+        fltr = [Provenienze.numeroprovenienza==Factb2b.supplier_id]            
+        results = self._datagrid(query_lst, groupby, fltr)
+        return dict(page='backoffice', results=results) 
+
+    def create(self):
+        """POST /backoffice: Create a new item"""
+        # url('stocks')
+
+    def new(self, format='html'):
+        """GET /backoffice/new: Form to create a new item"""
+        # url('new_stock')
+
+    def update(self, id):
+        """PUT /backoffice/id: Update an existing item"""
+        # Forms posted to this method should contain a hidden field:
+        #    <input type="hidden" name="_method" value="PUT" />
+        # Or using helpers:
+        #    h.form(url('stock', id=ID),
+        #           method='put')
+        # url('stock', id=ID)
+
+    def delete(self, id):
+        """DELETE /backoffice/id: Delete an existing item"""
+        # Forms posted to this method should contain a hidden field:
+        #    <input type="hidden" name="_method" value="DELETE" />
+        # Or using helpers:
+        #    h.form(url('stock', id=ID),
+        #           method='delete')
+        # url('stock', id=ID)
+
+

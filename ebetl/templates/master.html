@@ -1,0 +1,105 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      py:strip="">
+      
+      
+<head py:match="head" py:attrs="select('@*')">
+
+<?python
+from ebetl.controllers.root import todecimal  
+from babel.dates import format_date, format_datetime
+?>
+
+    <meta charset="${response.charset}" />
+    <meta name="viewport" content="initial-scale = 1.0,maximum-scale = 1.0" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+
+
+    <title py:if="False">Your generic title goes here</title>
+    <meta py:replace="select('*')"/>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" type="text/css" media="screen, print" href="${tg.url('/css/bootstrap.min.css')}" />
+    <!--<link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/bootstrap-theme.css')}"/>-->
+
+    <link rel="stylesheet" type="text/css" media="screen" href="${tg.url('/css/datepicker.css')}" />
+    <!-- Custom styles for this template -->
+    <link rel="stylesheet" type="text/css" media="print" href="${tg.url('/css/style.css')}" />
+
+
+    <script src="/js/jquery.js"></script>
+    <script src="/js/bootstrap.min.js"></script>
+    <script src="/js/bootstrap-editable.min.js"></script>  
+    <!-- Bootstrap datepicker http://www.eyecon.ro/bootstrap-datepicker/ -->
+    <!--<script src="/js/bootstrap-datepicker.js"></script>-->
+
+    <link rel="stylesheet" type="text/css" media="screen" href="/css/bootstrap-editable.css"/>
+  
+  </head>
+
+<body py:match="body" py:attrs="select('@*')">
+
+<!-- Fixed navbar -->
+    <div class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Ebetl</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="/b2b">B2B</a></li>           
+            <li><a href="/item">Items</a></li>          
+            <li><a href="/stock">Stock</a></li>
+            <li><a href="/purchase">Suppliers</a></li>            
+            <!--
+            <li><a href="#about">About</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li class="divider"></li>
+                <li class="dropdown-header">Nav header</li>
+                <li><a href="#">Separated link</a></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li>
+            -->
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="../navbar/">Default</a></li>
+            <li><a href="../navbar-static-top/">Static top</a></li>
+            <li class="active"><a href="./">Fixed top</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+
+    <!-- Flash messages -->
+    <py:with vars="flash=tg.flash_obj.render('flash', use_js=False)">
+      <div class="row"><div class="span8 offset2">
+        <div py:if="flash" py:replace="Markup(flash)" />
+      </div></div>
+    </py:with>
+
+    <div class="container">
+
+    <!-- Main included content -->
+    <div py:replace="select('*|text()')"/>
+
+    </div><!-- /.container -->
+
+    
+    
+  </body>
+</html>
