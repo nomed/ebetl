@@ -94,7 +94,8 @@ class BookkeepingController(BaseController):
         """GET /backoffice/new: Form to create a new item"""
         # url('new_stock')
 
-    def update(self, id):
+    @expose()
+    def update(self, id, *args, **kw):
         """PUT /backoffice/id: Update an existing item"""
         # Forms posted to this method should contain a hidden field:
         #    <input type="hidden" name="_method" value="PUT" />
@@ -102,6 +103,8 @@ class BookkeepingController(BaseController):
         #    h.form(url('stock', id=ID),
         #           method='put')
         # url('stock', id=ID)
+        DBSession.query(Factb2b).filter_by(doc_id=id).update(dict(booked=1))
+        redirect(url('/bookkeeping/show/%s'%id))
 
     def delete(self, id):
         """DELETE /backoffice/id: Delete an existing item"""
@@ -144,7 +147,7 @@ class BookkeepingController(BaseController):
 
         # Receipts
         recs = [i[0] for i in DBSession.query(Factb2b.rec_num).filter(
-                                Factb2b.instablog==id).distinct().all()]
+                                Factb2b.doc_id==id).distinct().all()]
         results['recs'] = []
         for rec_num in recs:
             

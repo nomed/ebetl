@@ -16,8 +16,8 @@ DBSession.query(Prodotti).join(Inventarir).join(Inventarirconta).filter(Inventar
 """
 
 import logging, os, re, sys
-logging.basicConfig(
-    level=logging.DEBUG)
+#logging.basicConfig(
+#    level=logging.DEBUG)
 log = logging.getLogger('ebetl.views')
 from sqlalchemy.orm import aliased
 

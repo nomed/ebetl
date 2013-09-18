@@ -190,7 +190,8 @@ class Factb2b(DeclarativeBase):
     b2b_mov_type = Column(Integer)    
     booked = Column(Integer, default=0)    
     closed = Column(Integer, default=0)  
-
+    # used only in b2b (helper status for bookkeeprt)    
+    validated = Column(Integer, default=0) 
 
 # document final price
 vat_total = Factb2b.b2b_net_total * Factb2b.b2b_vat_code/100

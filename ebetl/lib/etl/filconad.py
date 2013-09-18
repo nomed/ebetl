@@ -112,7 +112,6 @@ class FilconadObj(object):
 
                     if  b_ref_code in pricelist.keys():
                         txn.update(pricelist[b_ref_code])
-                    log.debug([b_ref_code])
                     ret.append(txn) 
                              
         return ret

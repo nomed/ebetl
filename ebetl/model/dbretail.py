@@ -713,10 +713,9 @@ class Inputb2b(DeclarativeBase):
     filename = Column(String(50))
     content = Column(BLOB)
     processed = Column(Integer, default = 0)
-    validated = Column(Integer, default = 0) # to financial system
+    booked = Column(Integer, default = 0) # to financial system
     exported = Column(Integer, default = 0) # to dbretail
-    validate = Column(Integer, default = 0) # ready to financial system
-    export = Column(Integer, default = 0) # ready to dbretail    
+    closed = Column(Integer, default=0)     
     acquired = Column(DateTime, default=datetime.now())
     updated = Column(DateTime, default = datetime.now())
     
