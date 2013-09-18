@@ -70,7 +70,12 @@ def get_pricelist(id, date=None, *args, **kw):
                     Listiniprovenienze.numeroprovenienza == id,
                     Listiniprovenienze.numeroprodottoprovenienza == Prodottiprovenienze.numeroprodottoprovenienza) )   
     #ret = ret.join(Reparti, Prodotti.numeroreparto == Reparti.numeroreparto)
-    ret = ret.filter(Prodottiprovenienze.numeroprovenienza==id)
+    ret = ret.filter(and_(Prodottiprovenienze.numeroprovenienza==id,
+                            #Prodottiprovenienze.codiceprodottoprovenienza=='588626'
+                            )
+    ).order_by(Prodottiprovenienze.codiceprodottoprovenienza)
+
+          
     ret = ret.all()
  
     return ret

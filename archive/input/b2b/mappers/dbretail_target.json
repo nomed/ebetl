@@ -43,6 +43,10 @@
         "prodottiprovenienze.numeroprovenienza", 
         "get_obj"
     ], 
+    "doc_row": [
+        "movimentir.numerorigamovimento", 
+        "get_obj"
+    ], 
     "account_desc": [
         "conticontabilita.contocontabilita", 
         "get_obj"
@@ -55,8 +59,8 @@
         "movimentir.numerounitamisura", 
         "get_obj"
     ], 
-    "supplier_item_code": [
-        "prodottiprovenienze.codiceprodottoprovenienza", 
+    "rec_num": [
+        "movimentit.numerodocumento", 
         "get_obj"
     ], 
     "fam_desc": [
@@ -68,7 +72,7 @@
         "get_obj"
     ], 
     "row": [
-        "movimentir.numerorigamovimento", 
+        "movimentir.ordine", 
         "get_obj"
     ], 
     "b2b_code": [
@@ -90,10 +94,6 @@
     "b2b_disc": [
         "movimentir.stvariazionenetto", 
         "get_discount"
-    ], 
-    "rec_num": [
-        "movimentit.numerodocumento", 
-        "get_obj"
     ], 
     "item_code": [
         "prodotti.codiceprodotto", 
@@ -127,16 +127,24 @@
         "movimentir.prezzonetto", 
         "get_obj"
     ], 
+    "supplier_item_code": [
+        "prodottiprovenienze.codiceprodottoprovenienza", 
+        "get_obj"
+    ], 
     "b2b_mov_type": [
         "movimentir.tiporiga", 
         "get_int"
     ], 
-    "inputb2b_id": [
-        "movimentit.numeromovimento", 
-        "get_obj"
+    "b2b_cost_center": [
+        "magazzini.codicemagazzino", 
+        "get_cost_center"
     ], 
     "account_code": [
         "conticontabilita.codicecontocontabilita", 
+        "get_obj"
+    ], 
+    "doc_id": [
+        "movimentit.numeromovimento", 
         "get_obj"
     ]
 }

@@ -11,9 +11,9 @@
         "eanprodotti.codicebilancia", 
         "get_strip"
     ], 
-    "supplier_item_discount": [
-        "listiniprovenienze.stvariazionenetto", 
-        "get_discount"
+    "supplier_item_id": [
+        "prodottiprovenienze.numeroprodottoprovenienza", 
+        "get_int"
     ], 
     "cost_center_code": [
         "h_cost_center_code", 
@@ -59,8 +59,8 @@
         "b_uom", 
         "get_strip"
     ], 
-    "supplier_item_code": [
-        "prodottiprovenienze.codiceprodottoprovenienza", 
+    "rec_num": [
+        "h_rec_num", 
         "get_strip"
     ], 
     "fam_desc": [
@@ -71,9 +71,13 @@
         "b_ref_desc", 
         "get_strip"
     ], 
-    "row": [
-        "b_index", 
-        "get_strip"
+    "item_ean_id": [
+        "eanprodotti.numeroeanprodotto", 
+        "get_int"
+    ], 
+    "supplier_item_discount": [
+        "listiniprovenienze.stvariazionenetto", 
+        "get_discount"
     ], 
     "b2b_code": [
         "b_ref_code", 
@@ -90,10 +94,6 @@
     "supplier_item_unit_price": [
         "listiniprovenienze.prezzonetto", 
         "get_float"
-    ], 
-    "rec_num": [
-        "h_rec_num", 
-        "get_strip"
     ], 
     "item_code": [
         "prodotti.codiceprodotto", 
@@ -127,9 +127,21 @@
         "b_unit_price", 
         "get_x1000"
     ], 
+    "supplier_item_code": [
+        "prodottiprovenienze.codiceprodottoprovenienza", 
+        "get_strip"
+    ], 
+    "row": [
+        "b_index", 
+        "get_strip"
+    ], 
     "b2b_mov_type": [
         "b_mov_type", 
         "get_int"
+    ], 
+    "b2b_cost_center": [
+        "h_cost_center_code", 
+        "get_cost_center"
     ], 
     "inputb2b_id": [
         "inputb2b_id", 

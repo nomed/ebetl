@@ -21,7 +21,10 @@ class B2b(Command):
     parser = Command.standard_parser(verbose=False)  
     parser.add_option("-w", "--write",
                       action="store_true", dest="write",
-                      help="Write files content to fact_b2b")                                       
+                      help="Write files content to fact_b2b")  
+    parser.add_option("-x", "--export",
+                      action="store_true", dest="export",
+                      help="Export to dbretail")
     (options, args) = parser.parse_args()
     
     def command(self):
@@ -29,6 +32,8 @@ class B2b(Command):
         b2bobj=B2bObj(config)                  
         if self.options.write:
             b2bobj.write_out()
+        if self.options.export:
+            b2bobj.export()            
              
         
 	    

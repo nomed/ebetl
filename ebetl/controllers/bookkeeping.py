@@ -76,9 +76,13 @@ class BookkeepingController(BaseController):
     @expose('ebetl.templates.bookkeeping')
     def index(self):
         """Handle the front-page."""
-        groupby = [Provenienze, Factb2b.instablog, Factb2b.doc_date, Factb2b.doc_num]
+        groupby = [Factb2b.booked, Factb2b.closed, Provenienze, Factb2b.doc_id, Factb2b.doc_date, Factb2b.doc_num]
         query_lst = groupby + FACT_B2B
-        fltr = [Provenienze.numeroprovenienza==Factb2b.supplier_id]            
+        fltr = [and_(
+                    Provenienze.numeroprovenienza==Factb2b.supplier_id,
+                    Factb2b.doc_id != None
+                )
+                ]            
         results = self._datagrid(query_lst, groupby, fltr)
         return dict(page='bookkeeping', results=results) 
 
@@ -111,36 +115,31 @@ class BookkeepingController(BaseController):
     @expose('ebetl.templates.bookkeeping_show')
     def show(self, id):
         """Handle the front-page."""
-        """GET /b2b/id: Show a specific item"""
-        docs = [i[0] for i in DBSession.query(Factb2b.doc_num).filter(
-                                    Factb2b.inputb2b_id==id).distinct().all()]
-                                    
-        ms = FACT_B2B
+        """GET /bookkeeping/id: Show a specific item"""
 
-        #results = DBSession.query(Factb2b).filter(Factb2b.inputb2b_id==id).all() 
         results = OrderedDict()
         for i in ['total' , 'account_code', 'vat_code', 
                     'recs', 'issues']:
             results[i]=None
 
         # Total                          
-        groupby = [Provenienze, Factb2b.instablog, Factb2b.doc_date, Factb2b.doc_num]
+        groupby = [Factb2b.booked, Factb2b.closed, 
+                    Provenienze, Factb2b.doc_id, Factb2b.doc_date, Factb2b.doc_num]
         query_lst = groupby + FACT_B2B
-        fltr = [and_(Factb2b.instablog==id,
+        fltr = [and_(Factb2b.doc_id==id,
                      Factb2b.supplier_id==Provenienze.numeroprovenienza)]              
-        results['total'] = self._datagrid(query_lst, groupby, fltr)       
-                                             
+        results['total'] = self._datagrid(query_lst, groupby, fltr)                                        
         # Account                            
         groupby = [Factb2b.doc_num,Factb2b.cost_center_code, Factb2b.account_code, Factb2b.b2b_vat_code]
-        query_lst = groupby + ms
+        query_lst = groupby + FACT_B2B
         
-        fltr = [Factb2b.instablog==id ]            
+        fltr = [Factb2b.doc_id==id ]            
         results['account_code'] = self._datagrid(query_lst, groupby, fltr)
                 
         # Vat
         groupby = [Factb2b.doc_num, Factb2b.cost_center_code, Factb2b.b2b_vat_code]
-        query_lst = groupby + ms
-        fltr = [Factb2b.instablog==id]              
+        query_lst = groupby + FACT_B2B
+        fltr = [Factb2b.doc_id==id]              
         results['vat_code'] = self._datagrid(query_lst, groupby, fltr) 
 
         # Receipts
@@ -150,14 +149,14 @@ class BookkeepingController(BaseController):
         for rec_num in recs:
             
             groupby = [Factb2b.doc_num, Factb2b.rec_num]
-            query_lst = groupby + ms
-            fltr = [Factb2b.instablog==id,
+            query_lst = groupby + FACT_B2B
+            fltr = [Factb2b.doc_id==id,
                 Factb2b.rec_num==rec_num
                  ] 
             results['recs'].append(self._datagrid(query_lst, groupby, fltr)[0]) 
 
         # Issues
-        fltr = [Factb2b.instablog==id,
+        fltr = [Factb2b.doc_id==id,
                 Factb2b.account_id==None ]              
         results['issues'] = DBSession.query(Factb2b).filter(and_(*fltr)).all()
                  
@@ -165,7 +164,7 @@ class BookkeepingController(BaseController):
         groupby = [Factb2b.doc_num, Factb2b.account_code, 
                    Factb2b.b2b_code, Factb2b.b2b_desc]
         query_lst = groupby + FACT_B2B_PRICE
-        fltr =   [Factb2b.instablog==id]       
+        fltr =   [Factb2b.doc_id==id]       
         results['products'] = self._datagrid(query_lst, groupby, fltr) 
         
         return dict(page='bookkeeping', results=results, id=id)   

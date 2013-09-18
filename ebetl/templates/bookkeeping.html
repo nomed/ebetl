@@ -15,7 +15,7 @@
 <div class="page-header">
     <ol class="breadcrumb">
       <li><a href="/">Home</a></li>      
-      <li><a href="/b2b">B2b</a></li>  
+      <li><a href="/$page">${page.capitalize()}</a></li>  
     </ol>
 </div>
 
@@ -33,73 +33,37 @@
 
 
 <div class="row">
-   <!--
-  <div class="col-md-1 hide">
 
-    <div class="panel panel-default">
-      <div class="panel-heading">Purchases</div>
-      <div class="panel-body">
-        <ul class="nav nav-pills">
-          <li><a href="/stock">Suppliers</a></li>
-        </ul>      
-      </div>
-     </div>
-  
-    <div class="panel panel-default">
-      <div class="panel-heading">Receive/Deliver By Orders</div>
-      <div class="panel-body">
-        <ul class="nav nav-pills">
-          <li><a href="#">Incoming Shipments</a></li>
-          <li><a href="#">Delivery Orders</a></li>
-        </ul>      
-      </div>
-     </div>
-     
-     <div class="panel panel-default">
-      <div class="panel-heading">Receive/Deliver Products</div>
-      <div class="panel-body">
-        <ul class="nav nav-pills">
-          <li><a href="#">Incoming Products</a></li>
-          <li><a href="#">Deliver Products</a></li>
-        </ul>      
-      </div>
-     </div>
-
-     <div class="panel panel-default">
-      <div class="panel-heading">Products</div>
-      <div class="panel-body">
-        <ul class="nav nav-pills">
-          <li><a href="#">Products by Category</a></li>
-          <li><a href="/item">Products</a></li>
-        </ul>      
-      </div>
-     </div>
-
-     
-   </div>
-    -->
   <div class="col-md-12">
   
 
 <py:if test="results">
 
-<h1>Documents</h1>
-
-
 <table class="table table-striped table-bordered table-hover">
     <thead>
     <tr>
-        <th></th>         
+        <th>B</th>    
+        <th>C</th>
+        <th>Supplier Code</th>
+        <th>Supplier</th>        
+        <th>Date</th>        
+        <th class="text-right">#</th> 
+        <th class="text-right">Lines</th>            
+        <th class="text-right">Net Total</th>                       
+        <th class="text-right">Vat Total</th>            
+        <th class="text-right">Gross Total</th>       
     </tr>
     </thead>
     <tbody>
 
     <tr py:for="row in results">
-        <td>${[row[0].codiceprovenienza]}</td>
-        <td>${[row[0].provenienza]}</td>
-        <td>${format_date(row[2])}</td>
-        <td class="text-right"><a href="/b2b/show/${row[1]}"> ${row[3]}</a></td>        
-        <td class="text-right" py:for="r in row[4:8]">${todecimal(r)}</td>                     
+        <td><span class="label label-warning" py:if="row[0]"> </span></td>
+        <td><span class="label label-success" py:if="row[1]"> </span></td>
+        <td>${[row[2].codiceprovenienza]}</td>
+        <td>${[row[2].provenienza]}</td>
+        <td>${format_date(row[4])}</td>
+        <td class="text-right"><a href="/bookkeeping/show/${row[3]}"> ${row[5]}</a></td>        
+        <td class="text-right" py:for="r in row[6:10]">${todecimal(r)}</td>                     
     </tr>
 
 

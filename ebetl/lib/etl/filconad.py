@@ -53,7 +53,7 @@ class FilconadObj(object):
         #                      config.get(record+'.filename_out'))
 
         self.path_file = os.path.join(self.path, self.filename)
-        print self.path
+        
         self.path_json = os.path.join(
                         os.path.dirname(os.path.realpath(self.path)),
                         'mappers', "%s.json"%record
@@ -68,7 +68,14 @@ class FilconadObj(object):
                         )
         jsonf = open(self.path_jsonmap , "r" )  
         self.jsonmap = json.load(jsonf)
-        jsonf.close()          
+        jsonf.close()    
+        
+        self.path_rosetta =  config.get(record+'.rosetta')     
+        self.rosetta = {}
+        if os.path.exists(self.path_rosetta):
+            rosettaf = open(self.path_rosetta , "r" )  
+            self.rosetta = json.load(rosettaf)
+            rosettaf.close()               
 
     def _get_files(self, *args, **kw):
         ret = []
@@ -143,7 +150,7 @@ class FilconadObj(object):
                                                 
         transaction.commit()
 
-    def write_out(self, *args, **kw):
+    def write_out(self, inputb2b_id=None, *args, **kw):
         """
         Process files from db and process docs and recs
         """
@@ -152,18 +159,23 @@ class FilconadObj(object):
                 Provenienze.codiceprovenienza==self.prov,
                 Provenienze.tipoprovenienza=="FOR").one()     
         # get files to process
-        files = DBSession.query(Inputb2b).filter(
+        if not inputb2b_id:
+            files = DBSession.query(Inputb2b).filter(
                     and_(Inputb2b.supplier_id==prov.numeroprovenienza,
                          Inputb2b.processed == 0)
                 ).order_by(Inputb2b.acquired).all()
-
+        else:
+            files = DBSession.query(Inputb2b).filter(
+                    and_(Inputb2b.supplier_id==prov.numeroprovenienza,
+                         Inputb2b.b2b_id == inputb2b_id)
+                ).order_by(Inputb2b.acquired).all()
         
         log.info("input_b2b: found %s to process"%(len(files)))  
         pricelist_tmp = None
         pricelist = None    
         for fobj in files:
 
-            # get current procelist linked to supplier
+            # get current pricelist linked to supplier
             if not pricelist_tmp:
                 pricelist_tmp = get_pricelist(prov.numeroprovenienza)
             # create a dict indexed by supplier_code
@@ -225,11 +237,12 @@ class FilconadObj(object):
                     #log.debug(pprint(factb2b_dict))
                     #sys.exit()
 
-                #setattr(fobjrow, "account_code", self.config.get("%s.notfound"%(self.record)) )
+                setattr(fobjrow, "account_code", self.config.get("%s.notfound"%(self.record)) )
 
-                for key, val in factb2b_dict.iteritems():                        
+                for key, val in factb2b_dict.iteritems():   
+                    if key in self.rosetta.keys():
+                        val = self.rosetta[key][val]
                     setattr(fobjrow, key, val)
-
                 DBSession.add(fobjrow) 
                 
                 #print fobjrow,fobjrow.doc_num                

@@ -31,7 +31,8 @@ contarigainventario = Sequence('contarigainventario')
 contarigainventarioconta = Sequence('contarigainventarioconta')
 contaautoean = Sequence('contaautoean')
 contab2b = Sequence('contab2b')
-
+contamovimento = Sequence('contamovimento')
+contarigamovimento = Sequence('contarigamovimento')
 count_b2b = Sequence('count_b2b')
 
 class Magazzini(DeclarativeBase):
@@ -43,9 +44,10 @@ class Magazzini(DeclarativeBase):
 
 class Provenienze(DeclarativeBase):
     __tablename__ = 'provenienze'
-    sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)    
+    sincrofield = Column(Integer, contasincrofield , autoincrement=True)    
     tipoprovenienza = Column(String(3))#FOR,CLI
-    numeroprovenienza= Column(Integer, contaprovenienza, autoincrement=True, primary_key=True)    
+    numeroprovenienza= Column(Integer, contaprovenienza, 
+                            autoincrement=True, primary_key=True)    
     codiceprovenienza = Column(String(20), unique=True, nullable=False)  
     provenienza =  Column(String(100))
     partitaiva = Column(String(16))
@@ -84,7 +86,10 @@ class Listiniprovenienze(DeclarativeBase):
     numerolistinoprovenienza = Column(Integer,primary_key=True)
     numeroprodottoprovenienza = Column(Integer, ForeignKey(
                         'prodottiprovenienze.numeroprodottoprovenienza'))
-    prodottoprovenienza = relation('Prodottiprovenienze', backref='listini')     
+    prodottoprovenienza = relation('Prodottiprovenienze', backref='listini')  
+    numeroeanprodotto = Column(Integer, ForeignKey(
+                        'eanprodotti.numeroeanprodotto'))
+    eanprodotto = relation('Eanprodotti', backref='listiniean')      
     numeroprovenienza = Column(Integer, ForeignKey(
                         'provenienze.numeroprovenienza'))
     proveninenza = relation('Provenienze', backref='listini')
@@ -285,7 +290,7 @@ class Movimentit(DeclarativeBase):
     sincroserverfield = Column(Integer)
     #instablog
     #updtablog
-    numeromovimento = Column(Integer, autoincrement=True, primary_key=True)
+    numeromovimento = Column(Integer, contamovimento, autoincrement=True, primary_key=True)
     tipodocumento = Column(String(3))
     numeroazienda = Column(Integer)
     numerosedeazienda = Column(Integer)
@@ -312,16 +317,17 @@ class Movimentit(DeclarativeBase):
     #variante
     tipoprovenienza = Column(String(3))
     numeroprovenienza = Column(Integer, ForeignKey('provenienze.numeroprovenienza')) 
-    provenienza = relation('Provenienze')       
+    provenienza= relation('Provenienze')       
     numerosedeprovenienza = Column(Integer)
     #intestazione
-    #provenienza
-    #codicefiscale
-    #partitaiva
-    #indirizzo
-    #cap
-    #citta
-    #prov
+    ragionesociale=Column('provenienza', String(250))
+    codicefiscale = Column(String(16))
+    partitaiva = Column(String(16))    
+    #
+    indirizzo = Column(String(100))  
+    cap = Column(String(5))  
+    citta = Column(String(50))  
+    prov = Column(String(2))  
     #telefono
     #fax
     #destinazione
@@ -387,11 +393,11 @@ class Movimentir(DeclarativeBase):
     #logicdelete
     sincrofield = Column(Integer, contasincrofield , autoincrement=True)
     #sincroserverfield
-    #instablog
+    instablog = Column(Integer)
     #updtablog
     numeromovimento = Column(Integer, ForeignKey('movimentit.numeromovimento'))
     movimento = relation('Movimentit',  backref='movimentir')     
-    numerorigamovimento = Column(Integer, autoincrement=True, primary_key=True)
+    numerorigamovimento = Column(Integer, contarigamovimento, autoincrement=True, primary_key=True)
     datamovimento = Column(DateTime)
     dataregistrazione = Column(DateTime)
     movqta = Column(Integer )
@@ -477,8 +483,8 @@ class Movimentir(DeclarativeBase):
     totalenetto = Column(Float)
     ivatotale = Column(Float)
     totale = Column(Float)
-    #dafatturare 
-    #qtafatturata
+    dafatturare = Column(Integer)
+    qtafatturata = Column(Float)
     #deposito
     #numerocausalescarto
     #rigaannullata
@@ -488,7 +494,7 @@ class Movimentir(DeclarativeBase):
     #misure
     #note
     #stileriga
-    #ordine
+    ordine = Column(Integer)
     #pk
 
 class Ricevutet(DeclarativeBase):
@@ -697,7 +703,7 @@ class Inventarirconta(DeclarativeBase):
     
 class Inputb2b(DeclarativeBase):
     __tablename__='input_b2b'
-    sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
+    sincrofield = Column(Integer, contasincrofield , autoincrement=True)
     sincroserverfield = Column(Integer)
     b2b_id = Column(Integer, contab2b,  autoincrement=True,primary_key=True) 
     supplier_id = Column(Integer, ForeignKey(Provenienze.numeroprovenienza))  
@@ -707,6 +713,10 @@ class Inputb2b(DeclarativeBase):
     filename = Column(String(50))
     content = Column(BLOB)
     processed = Column(Integer, default = 0)
+    validated = Column(Integer, default = 0) # to financial system
+    exported = Column(Integer, default = 0) # to dbretail
+    validate = Column(Integer, default = 0) # ready to financial system
+    export = Column(Integer, default = 0) # ready to dbretail    
     acquired = Column(DateTime, default=datetime.now())
     updated = Column(DateTime, default = datetime.now())
     
