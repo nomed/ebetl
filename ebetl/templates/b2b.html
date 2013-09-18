@@ -1,0 +1,101 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <title>ebetl: Stock</title>
+      
+  
+</head>
+
+<body>
+
+<div class="page-header">
+    <ol class="breadcrumb">
+      <li><a href="/">Home</a></li>      
+      <li><a href="/$page">${page.capitalize()}</a></li>  
+    </ol>
+</div>
+
+<!-- List dimensions from the model
+
+<div class="btn-group">
+    <py:for each="dimension in dimensions">
+        <button class="btn">
+        <a href="/sales/index/{dimension.name}">{dimension.label or dimension.name}</a>
+        </button>
+    </py:for>
+</div>
+ -->
+
+
+
+<div class="row">
+
+  <div class="col-md-12">
+  
+
+<py:if test="results">
+
+<table class="table table-striped table-bordered table-hover">
+    <thead>
+    <tr>
+        <th></th>        
+        <th>Date</th>
+        <th >#</th>
+        <th>B2B Code</th>
+        <th>B2B Source</th>        
+        <th>B2B Type</th>                  
+        <th>B2B Source</th>          
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr py:for="row in results">
+        <td>
+            <py:if test="row.processed == 0">
+                 <span   class="label label-info" >N</span>
+            </py:if>
+            <!--<py:if test="row.processed == 1">
+                 <button   type="button" class="btn btn-default" >N</button>
+            </py:if> -->           
+            <py:if test="row.booked == 0">
+                  <span   class="label label-warning" >B</span>
+            </py:if>
+            <py:if test="row.booked == 1">
+                 <span   class="label label-success" >B</span>
+            </py:if>            
+            <py:if test="row.exported == 0">
+                  <span   class="label label-warning" >E</span>
+            </py:if>
+            <py:if test="row.exported == 1">
+                 <span   class="label label-success" >E</span>
+            </py:if>            
+            
+        </td>                          
+        <td>${format_datetime(row.acquired)}</td>    
+        <th>${str(row.b2b_id).zfill(5)}</th>
+        <td>${row.supplier_code}</td>   
+        <td>${row.supplier.provenienza}</td>     
+        <td>${row.record}</td>
+        <td><a href="/b2b/show/${row.b2b_id}">${row.filename}</a></td>                
+    </tr>
+
+
+    </tbody>
+</table> 
+
+</py:if> <!-- if dim -->   
+  </div>
+</div>
+
+
+
+
+<script src="/js/stock.js"></script>
+
+
+</body>
+</html>
