@@ -1,0 +1,174 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <title>ebetl: Stock</title>
+<?python
+from ebetl.controllers.root import todecimal     
+?>
+
+
+      
+  
+</head>
+
+<body>
+
+<div class="page-header">
+    <ol class="breadcrumb">
+      <li><a href="/">Home</a></li>      
+      <li><a href="/stock">Stock</a></li>  
+      <li><a href="/stock/${doc.numerodocumento}">${doc.numerodocumento}</a></li>                
+    </ol>    
+</div>
+
+
+
+<div class="row">
+  <div class="col-md-3">
+    <!--
+    <ul class="nav nav-pills nav-stacked ">
+     <li class="active"><a href="#"></a></li>
+      <li ><a href="/sales/index/location">By Location</a></li>
+      <li ><a href="/sales/index/product">By Product</a></li>
+      <li><a href="/sales/index/date">By Date (Days)</a></li>     
+      <li><a href="/sales/index/date3">By Date (Weeks)</a></li>         
+    </ul>  
+    -->
+<p>Num: ${doc.numerodocumento}</p>
+<p>Date: ${format_date(doc.datainventario)}</p>  
+<p>Cost Center: ${doc.magazzino.magazzino}</p>
+<p>Desc: ${doc.descrizione}</p>
+<div class="list-group">
+    <div >
+    <a py:for="cat in result.keys()[0:1]" 
+        class="list-group-item"
+        href="#${str(cat.numeroreparto).zfill(5)}" 
+        data-toggle="tab">
+        ${str(cat.codicereparto).zfill(3)} - $cat.reparto <span class="badge">${len(result[cat])}</span>
+    </a>
+    </div>
+ <py:if test="len(result.keys()) > 1">
+    <div py:for="cat in result.keys()[1:]">
+    <a class="list-group-item" 
+        href="#${str(cat.numeroreparto).zfill(5)}"  
+        data-toggle="tab">
+        ${str(cat.codicereparto).zfill(3)} - $cat.reparto <span class="badge">${len(result[cat])}</span>
+    </a>
+    </div>
+ </py:if>
+</div>    
+
+
+    
+  </div>
+  <div class="col-md-9">
+  
+
+
+
+<py:if test="result">
+
+
+
+
+
+
+
+<div class="tab-content">
+
+
+<py:for each="cat, products in result.iteritems()">
+<div id="${str(cat.numeroreparto).zfill(5)}" class="tab-pane active" >
+<h2>${str(cat.codicereparto).zfill(3)} - $cat.reparto</h2>
+<table id="qty" class="table table-striped table-bordered table-hover">
+    <thead>
+    <tr>
+        <th class="text-right">Code</th>
+        <th class="">Product</th>
+        <th class="text-right">Uom</th> 
+        <th class="text-right">Qta</th>    
+        <th class="text-right">Cost</th>            
+        <th class="text-right">Tot Cost</th>         
+    </tr>
+    </thead>
+    <tbody>
+
+    <tr py:for="(prod,inv) , rows in products.iteritems()">
+    
+        <td class="text-right">${prod.codiceprodotto}</td>
+        <td>  
+            <div class="modal fade" id="prod$prod.numeroprodotto" tabindex="-1" role="dialog" aria-labelledby="$prod.prodotto" aria-hidden="true" />        
+            <a data-toggle="modal" data-target="#prod$prod.numeroprodotto" href="/modal/product/$prod.numeroprodotto" >${prod.prodotto}</a> <small py:if="prod.unitamisura">(${prod.qtacontenuto} x ${prod.unitamisura.codiceunitamisura})</small>
+        
+            <!-- Modal -->
+
+            
+        </td>
+        <td class="text-right">
+            <table class="table table-striped table-bordered table-hover">
+            <tr>
+                <td>
+                <py:if test="prod.unitamisura">${prod.unitamisura.codiceunitamisura}</py:if>
+                
+                </td>
+                <td>
+                 <a id="qta" href="#" data-pk="$doc.numeroinventario/$prod.numeroprodotto">
+                    <py:if test="inv">${todecimal(inv.qta)}</py:if>
+                </a>    
+                </td>                
+                            
+            </tr>
+            <tr py:if="prod.pezzixcollo > 1">
+                <td > 
+            <py:if test="prod.unitamisura">
+                ${prod.pezzixcollo} ${prod.unitamisura.codiceunitamisura}
+            </py:if> 
+                </td>   
+                <td>
+                <a id="qtaconf" href="#" data-pk="$doc.numeroinventario/$prod.numeroprodotto">
+            <py:if test="inv">${todecimal(inv.qtaconf)}</py:if>
+            </a>
+                </td>
+                               
+            </tr>            
+            </table>
+       </td>
+        <td class="text-right">   
+            <span id="totale_qta$doc.numeroinventario/$prod.numeroprodotto">
+                <py:if test="inv">${todecimal(inv.totale_qta)}</py:if>
+            </span>
+        </td>             
+        <td class="text-right">   
+            <span id="cost$doc.numeroinventario/$prod.numeroprodotto" >
+            <py:if test="inv">${todecimal(inv.costo)}</py:if>
+            </span>
+        </td> 
+        <td class="text-right">   
+            <span id="totale_costo$doc.numeroinventario/$prod.numeroprodotto" >
+            <py:if test="inv"><b>${todecimal(inv.totale_costo)}</b></py:if>
+            </span>
+        </td>     
+                                    
+    </tr>
+
+
+    </tbody>
+</table>
+
+</div>
+</py:for> 
+
+</div> <!-- div pill -->
+</py:if> <!-- if dim -->   
+  </div>
+</div>
+
+    <script src="/js/stock.js"></script>
+
+
+</body>
+</html>
