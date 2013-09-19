@@ -33,6 +33,8 @@ try:
 except:
     from ordereddict import OrderedDict
 
+from tg.predicates import has_permission
+
 def todecimal(floatnum):
     if not floatnum:
         floatnum = 0
@@ -242,6 +244,10 @@ class RootController(BaseController):
     must be wrapped around with :class:`tg.controllers.WSGIAppController`.
 
     """
+    
+    # The predicate that must be met for all the actions in this controller:
+   
+    
     secc = SecureController()
     admin = AdminController(model, DBSession, config_type=TGAdminConfig)
     

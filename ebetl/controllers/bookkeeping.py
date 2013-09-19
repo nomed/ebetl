@@ -30,6 +30,7 @@ try:
 except:
     from ordereddict import OrderedDict
 
+from tg.predicates import has_permission
     
 __all__ = ['BookkeepingController']
 
@@ -66,6 +67,10 @@ class BookkeepingController(BaseController):
     involves the recording of financial transactions is a bookkeeping process.
     
     """
+
+    # The predicate that must be met for all the actions in this controller:
+    allow_only = has_permission('manage',
+                                msg=l_('Only for people with the "manage" permission'))
     
     def _datagrid(self, query_lst , groupby, fltr):
         ret = DBSession.query(*query_lst)
