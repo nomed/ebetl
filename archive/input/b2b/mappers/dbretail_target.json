@@ -40,7 +40,7 @@
         "get_obj"
     ], 
     "supplier_id": [
-        "prodottiprovenienze.numeroprovenienza", 
+        "movimentit.numeroprovenienza", 
         "get_obj"
     ], 
     "doc_row": [

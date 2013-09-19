@@ -294,7 +294,7 @@ class B2bObj(object):
             for res in results:
                 factb2b_dict = {}
                 #factb2b_dict['supplier_id'] = prov.numeroprovenienza
-                
+                import pprint; pprint.pprint(results)
                 for key, val in self.jsonmap.iteritems():
                     src, func = val
                     newval = getattr(mapper, func)(res[src])
