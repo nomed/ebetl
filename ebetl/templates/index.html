@@ -1,0 +1,135 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <title>Welcome to TurboGears 2.2, standing on the shoulders of giants, since 2007</title>
+</head>
+
+<body>
+
+    <div class="container">
+
+      <!-- Main jumbotron for a primary marketing message or call to action 
+      <div class="jumbotron">
+        <h1>Extract, Transform, Load</h1>
+        <p></p>
+        <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+      </div>-->
+
+      <div class="body-content">
+
+        <!-- Example row of columns -->
+        <div class="row">
+          <div class="col-lg-4">
+            <h2>B2B</h2>
+            <p></p>
+            <p><a class="btn btn-default" href="/b2b">View details &raquo;</a></p>
+          </div>
+          <div class="col-lg-4">
+            <h2>Bookkeeping</h2>
+            <p></p>
+            <p><a class="btn btn-default" href="/bookkeeping">View details &raquo;</a></p>
+         </div>
+          <div class="col-lg-4">
+            <h2>Stock</h2>
+            <p></p>
+            <p><a class="btn btn-default" href="/stock">View details &raquo;</a></p>
+          </div>
+          <div class="col-lg-4">
+            <h2>[TODO]</h2>
+            <p></p>
+            <p><a class="btn btn-default" href="#">View details &raquo;</a></p>
+          </div>
+          <div class="col-lg-4">
+            <h2>[TODO]</h2>
+            <p></p>
+            <p><a class="btn btn-default" href="#">View details &raquo;</a></p>
+         </div>
+          <div class="col-lg-4">
+            <h2>[TODO]</h2>
+            <p></p>
+            <p><a class="btn btn-default" href="#">View details &raquo;</a></p>
+          </div>          
+        </div>
+
+        <hr/>
+      </div>
+
+
+<!--
+<h1>TODO</h1>
+    <pre>
+
+movcode:
+======================================================================
+CARICO, DTDIRF, FACFOR, FATFOR, FATSC, MOVMAG, ORDFOR, SCACOM, VENDITA
+
+type:
+======================================================================
+CAR, DUC, MTM, ORD, SCA, VEA, VEN
+
+CAR: documenti passivi ( movval=-1 > solo valore )
+
+VEN: scontrino pos ( movval=1 )
+
+DUC: fattura da scontrino (movval=0) , fattura (acc) cliente (movval=1)
+
+VEA: scontrini annullati ( curr: ncr )
+
+MTM: 
+
+movval:
+======================================================================
+-1 , 0 , 1
+
+========SCONTI
+
+prezzolistino: presso su scheda
+prezzo: prezzo su scontrino
+
+iterare per movimento + prodotto salvare totale + con totale -
+
+totale - ==> sconto
+
+EX:
+
+a) Vendite per reparto per il mese di Luglio 2013:
+
+/product?cut=date:2013,7|movcode:VENDITA|movval:1|type:VEN
+
+b) 
+
+
+==========================
+MICRO
+
+Corrispettivi  Pagamenti != Totale Reparti
+08/07/2013
+15/07/2013
+17/07/2013
+24/07/2013
+
+
+Corrispettivi 11/07/2013 Totale Locale != Totale Remoto
+11/07/2013
+13/07/2013
+16/07/2012
+20/07/2013
+25/07/2013
+
+
+
+
+
+
+
+</pre>
+-->
+
+    </div> <!-- /container -->
+
+</body>
+</html>
