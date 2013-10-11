@@ -72,10 +72,12 @@ class BookkeepingController(BaseController):
     allow_only = has_permission('manage',
                                 msg=l_('Only for people with the "manage" permission'))
     
-    def _datagrid(self, query_lst , groupby, fltr):
+    def _datagrid(self, query_lst , groupby, fltr, ordr=None):
         ret = DBSession.query(*query_lst)
         #ret = ret.order_by(Factb2b.row)
         ret = ret.group_by(*groupby).filter(and_(*fltr))
+        if ordr:
+            ret = ret.order_by(*ordr)      
         return ret.all()    
     
     @expose('ebetl.templates.bookkeeping')
@@ -85,10 +87,11 @@ class BookkeepingController(BaseController):
         query_lst = groupby + FACT_B2B
         fltr = [and_(
                     Provenienze.numeroprovenienza==Factb2b.supplier_id,
-                    Factb2b.doc_id != None
+                    #Factb2b.doc_id != None
                 )
-                ]            
-        results = self._datagrid(query_lst, groupby, fltr)
+                ]    
+        ordr = [Factb2b.doc_date.desc()]        
+        results = self._datagrid(query_lst, groupby, fltr, ordr=ordr)
         return dict(page='bookkeeping', results=results) 
 
     def create(self):
@@ -138,10 +141,14 @@ class BookkeepingController(BaseController):
                      Factb2b.supplier_id==Provenienze.numeroprovenienza)]              
         results['total'] = self._datagrid(query_lst, groupby, fltr)                                        
         # Account                            
-        groupby = [Factb2b.doc_num,Factb2b.cost_center_code, Factb2b.account_code, Factb2b.b2b_vat_code]
+        groupby = [Factb2b.doc_num,Factb2b.cost_center_code, Factb2b.account_code,
+                    Factb2b.account_desc, Factb2b.b2b_vat_code]
         query_lst = groupby + FACT_B2B
         
-        fltr = [Factb2b.doc_id==id ]            
+        fltr = [Factb2b.doc_id==id ]     
+        
+        
+               
         results['account_code'] = self._datagrid(query_lst, groupby, fltr)
                 
         # Vat

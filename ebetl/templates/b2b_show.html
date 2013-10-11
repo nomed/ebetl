@@ -67,7 +67,7 @@
                     role="dialog" aria-labelledby="export${id}" aria-hidden="true" />        
             <a py:if="not inputb2b.exported" id="exportme" 
             data-toggle="modal" data-target="#export${id}" 
-            href="/modal/b2b_book/${id}">   
+            href="/modal/b2b_export/${id}">   
                 <button   type="button" class="btn btn-warning" >
                 E
                 </button>
@@ -141,7 +141,25 @@
   </div>
 </div>
 
-
+<div>
+<table class="table table-bordered table-hover">
+<tr>
+        <th><button   type="button" class="btn btn-warning" >V</button></th>
+        <th>To Validate</th>
+        <td>The document should be checked (Cost Centers and Account codes) </td>
+</tr>
+<tr>
+        <th><button   type="button" class="btn btn-success" >V</button></th> 
+        <th>Validated</th>       
+        <td>The document has been validated , next step is to book the b2b batch</td>
+</tr>
+<tr>
+        <th><button   type="button" class="btn btn-danger" >C</button></th>  
+        <th>Closed</th> 
+        <td>The document has been acquired</td>     
+</tr>           
+</table>
+</div>
 
 
 <script src="/js/stock.js"></script>

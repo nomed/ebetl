@@ -34,6 +34,8 @@ contab2b = Sequence('contab2b')
 contamovimento = Sequence('contamovimento')
 contarigamovimento = Sequence('contarigamovimento')
 count_b2b = Sequence('count_b2b')
+contaalias = Sequence('contaalias')
+
 
 class Magazzini(DeclarativeBase):
     __tablename__ = 'magazzini'
@@ -649,6 +651,24 @@ class Inventarit(DeclarativeBase):
         return ret
 
 class Inventarir(DeclarativeBase):
+    """
+i=DBSession.query(Inventarit).filter_by(numeroinventario=14).one()
+
+for p in ps:
+    try:
+        inv= DBSession.query(Inventarir).filter(and_(
+            Inventarir.numeroinventario==14,
+            Inventarir.numeroprodotto==p.numeroprodotto,
+            Inventarir.numeroeanprodotto==p.numeroeanprodotto
+            )).one()
+    except:
+        inv = Inventarir()
+        inv.numeroinventario = 14
+        inv.numeroprodotto=p.numeroprodotto
+        inv.numeroeanprodotto=p.numeroeanprodotto
+        DBSession.add(inv)
+        DBSession.flush()
+    """
     __tablename__='inventarir'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
     sincroserverfield = Column(Integer)
@@ -700,6 +720,17 @@ class Inventarirconta(DeclarativeBase):
             perms = perms | set(g.permissions)
         return perms  
     """    
+
+class Alias(DeclarativeBase):
+    __tablename__='alias'
+    sincrofield = Column(Integer, contasincrofield , autoincrement=True)
+    sincroserverfield = Column(Integer)
+    numeroalias = Column(Integer, contaalias,  autoincrement=True,primary_key=True)    
+    tipoprodotto = Column(Unicode(3), default=u'PRD') 
+    numeroprodotto = Column(Integer)
+    numeroeanprodotto=Column(Integer)
+    alias = Column(Unicode(30))
+    
     
 class Inputb2b(DeclarativeBase):
     __tablename__='input_b2b'

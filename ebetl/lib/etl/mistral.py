@@ -57,11 +57,19 @@ from ebetl.lib.etl.config import _ensure_unicode
 from ebetl.lib.etl.config import movcode_labels
 from ebetl.model import *
 from sqlalchemy import and_, or_
+from ebetl.model.zerobi import FACT_B2B,FACT_B2B_PRICE
 import transaction 
 from pprint import PrettyPrinter
 import csv
 
 
+vat_total = Factb2b.b2b_net_total * Factb2b.b2b_vat_code/100
+gross_total = Factb2b.b2b_net_total + vat_total
+COLUMNS_H = [
+        label('net_total', func.sum(Factb2b.b2b_net_total)),
+        label('vat_total', func.sum(vat_total)),        
+        label('gross_total', func.sum(gross_total)),                                         
+        ]
 
 
 def get_data(data):
@@ -73,6 +81,7 @@ def get_data(data):
     return y+m+d #YYYYMMDD (20130611)
 
 def get_fixedwidth(data,l=12):
+    data = str(data)
     return " "*(l-len(data))+data # L 12
 
 def get_fixednumdoc(data,l=12):
@@ -193,6 +202,27 @@ class Db2Mistral(object):
         ret=ret+" "*(255-len(ret))+'*'
         return ret
 
+    def get_h2(self,h):
+        """{
+        'gross': 181.61, 
+        'doccode': 'FACFOR',  [10]
+        'data': '20130204', 
+        'net': 165.1, 
+        'numdoc': '       47862', 
+        'codfor': '      000003'
+        }
+        """
+        ret='T'
+        ret=ret+get_fixedwidth(h['doccode'],10)
+        ret=ret+get_fixedwidth(h['data'],8)
+        ret=ret+get_fixedwidth(h['codfor'],16)
+        ret=ret+get_fixednumdoc(h['numdoc'],12)
+        ret=ret+get_fixedwidth(' ',16)
+        ret=ret+get_fixednum(h['gross'],16)
+        ret=ret+" "*(255-len(ret))+'*'
+        return ret
+
+
     def get_r(self,data):
         """{
         'gross': 181.61, 
@@ -222,6 +252,33 @@ class Db2Mistral(object):
                     ret_rows.append(r)
         return ret_rows
 
+    def get_r2(self,h, rows):
+        """{
+        'gross': 181.61, 
+        'doccode': 'FACFOR',  [10]
+        'data': '20130204', 
+        'net': 165.1, 
+        'numdoc': '       47862', 
+        'codfor': '      000003'
+        }
+        """
+        ret='R'
+        ret=ret+get_fixedwidth(h['doccode'],10)
+        ret=ret+get_fixedwidth(h['data'],8)
+        ret=ret+get_fixedwidth(h['codfor'],16)
+        ret=ret+get_fixednumdoc(h['numdoc'],12)
+        ret_rows=[]
+        for rdict in rows:
+            r=ret
+
+            r=r+get_fixedwidth(rdict['account_code'],16)  
+            r=r+get_fixednum(rdict['net_total'],16)
+            r=r+get_fixedwidth(rdict['cost_center'],8) 
+            r=r+get_fixedwidth(rdict['vat_code'],16) 
+            r=r+" "*(255-len(r))+'*'
+            ret_rows.append(r)
+        return ret_rows
+
     def get_f(self,data):
         """{
         'gross': 181.61, 
@@ -249,27 +306,32 @@ class Db2Mistral(object):
             ret_rows.append(r)
         return ret_rows
 
-        
-    def get_mov(self,codmov, *args, **kw):
-        orlist = []
-        log.debug("get_mov: %s"%codmov)
-        for c in codmov:
-            orlist.append(Movimentit.codicemovimento==c)  
-        from pprint import pprint
-        tables = (Movimentit, Movimentir, Reparti, Prodotti)
-        columns = []
-        for m in tables:
-            for c in m.__table__.columns:
-                    if not c in columns:
-                        columns.append(c._label)
-        pprint(columns)
-        movst = DBSession.query(*tables)#, Prodotti, Eanprodotti, )
-        movst = movst.join(Movimentir, Movimentit.numeromovimento == Movimentir.numeromovimento)
-        movst = movst.filter(and_(or_(*orlist),
-                                  Movimentit.numerotipopagamento==1,)).order_by(
-                                                    Movimentit.datadocumento).all() 
+    def get_f2(self,h,rows):
+        """{
+        'gross': 181.61, 
+        'doccode': 'FACFOR',  [10]
+        'data': '20130204', 
+        'net': 165.1, 
+        'numdoc': '       47862', 
+        'codfor': '      000003'
+        }
+        """
+        ret='I'
+        ret=ret+get_fixedwidth(h['doccode'],10)
+        ret=ret+get_fixedwidth(h['data'],8)
+        ret=ret+get_fixedwidth(h['codfor'],16)
+        ret=ret+get_fixednumdoc(h['numdoc'],12)
+        ret_rows=[]
+        for rdict in rows:
+            r=ret
+            r=r+get_fixedwidth(rdict['vat_code'],16)  
+            r=r+get_fixednum(rdict['net_total'],16)
+            r=r+get_fixednum(rdict['vat_total'],16)            
+            r=r+get_fixednum(rdict['gross_total'],16)  
+            r=r+" "*(255-len(r))+'*'
+            ret_rows.append(r)        
+        return ret_rows        
 
-        sys.exit()
 
         
     def get_mov2(self,codmov, *args, **kw):
@@ -364,8 +426,83 @@ class Db2Mistral(object):
             m.numerotipopagamento=3
             DBSession.add(m)
         return ret
+
+    def _datagrid(self, query_lst , groupby, fltr):
+        ret = DBSession.query(*query_lst)
+        ret = ret.group_by(*groupby).filter(and_(*fltr))
+        return ret.all()
+
+    def get_mov(self,codmov, *args, **kw):
+        # Total                          
+        groupby = [Provenienze, Factb2b.booked, 
+                    Factb2b.doc_date, Factb2b.doc_num]
+        query_lst = groupby + COLUMNS_H
+        fltr = [and_(Factb2b.booked==1,
+                     Factb2b.supplier_id==Provenienze.numeroprovenienza)]              
+        movst = self._datagrid(query_lst, groupby, fltr)           
+
+        headers = []
+        lines = []
+        #movst = [movst[0]]
+        for m in movst:
+            provobj = m[0]
+            codfor = provobj.codiceprovenienza
+            numdoc = m[3]
+            dataobj = m[2]
+            toadd = True
+            doc_dict = {}
+            h = {}
+            h['supplier_id'] = provobj.numeroprovenienza
+            h['dataobj'] = dataobj
+            h['data']=get_data(dataobj) # AAAAMMDD | ['20130611'] | l8
+            h['codfor']=codfor # ['      000795'] | l12
+            h['numdoc']=numdoc # ['        257R'] | l12
+            h['gross']=m[4]
+            h['net']=m[6]
+            h['doccode']='FATFOR'
+            headers.append(h)
+            
+            lines.append(self.get_h2(h))
+            
+            # Account                            
+            groupby = [Factb2b.doc_num,
+                        Factb2b.cost_center_code, 
+                        Factb2b.account_code, 
+                        Factb2b.b2b_vat_code]
+            query_lst = groupby + COLUMNS_H
+        
+            fltr = [and_(
+                     Factb2b.doc_num == numdoc,
+                     Factb2b.supplier_id==provobj.numeroprovenienza,
+                     Factb2b.doc_date==dataobj)]            
+            rows = self._datagrid(query_lst, groupby, fltr)
+            columns = ['numdoc', 'cost_center', 
+                        'account_code', 'vat_code', 
+                        'net_total', 'vat_total', 'gross_total']
+            rows = [dict(zip(columns,i)) for i in rows]
+            rows_tmp = self.get_r2(h, rows)
+            lines = lines + rows_tmp
+            
+            # Vat
+            groupby = [Factb2b.doc_num, Factb2b.cost_center_code, Factb2b.b2b_vat_code]
+            query_lst = groupby + COLUMNS_H
+            fltr = [and_(Factb2b.doc_num == numdoc,
+                     Factb2b.supplier_id==provobj.numeroprovenienza,
+                     Factb2b.doc_date==dataobj)]              
+            rows = self._datagrid(query_lst, groupby, fltr) 
+            columns = ['numdoc', 'cost_center', 'vat_code', 
+                        'net_total', 'vat_total', 'gross_total']
+            rows = [dict(zip(columns,i)) for i in rows]
+            rows_tmp = self.get_f2(h, rows)
+            lines = lines + rows_tmp            
+            from pprint import pprint
+            pprint(lines)
+            #pprint(h)
+            #pprint(rows)
+            
+        return headers, lines
                
-    def write_out(self,*args, **kw):
+    def write_out_old(self,*args, **kw):
         opath=self.config.get('mistral.path_output') 
         log.debug("opath: %s"%(opath))
         fname=self.config.get('mistral.filename')
@@ -389,6 +526,40 @@ class Db2Mistral(object):
                 for i in f:
                     print>>fobj, i
         fobj.close()
+        #stream = tmpl.generate(ret=ret)
+                     
+        #s = stream.render('html', doctype='html', encoding='utf-8')
+        #output_html = open(opath+'MOVFAT.html', 'w')
+        
+        #output_html.write(s)
+        transaction.commit()
+
+    def write_out(self,*args, **kw):
+        opath=self.config.get('mistral.path_output') 
+        log.debug("opath: %s"%(opath))
+        fname=self.config.get('mistral.filename')
+        log.debug("fname: %s"%(fname))
+        fout=os.path.join(opath,fname)
+        log.debug("fout: %s"%fout)
+        
+        fobj=open(fout,'wr')
+        headers, ret = self.get_mov(self.codmov)
+        
+        for r in ret:
+                
+                print>>fobj, r
+
+
+        
+        for h in headers:
+            DBSession.query(Factb2b).filter(
+                and_(
+                    Factb2b.supplier_id==h['supplier_id'],
+                    Factb2b.doc_date == h['dataobj'],
+                    Factb2b.doc_num == h['numdoc'],
+                )
+            ).update(dict(closed=1))
+        fobj.close()            
         #stream = tmpl.generate(ret=ret)
                      
         #s = stream.render('html', doctype='html', encoding='utf-8')

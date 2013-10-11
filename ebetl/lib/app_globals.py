@@ -3,7 +3,8 @@
 """The application's Globals object"""
 
 __all__ = ['Globals']
-
+from tgext.asyncjob import start_async_worker
+import tgext.asyncjob
 
 class Globals(object):
     """Container for objects available throughout the life of the application.
@@ -15,4 +16,4 @@ class Globals(object):
 
     def __init__(self):
         """Do nothing, by default."""
-        pass
+        start_async_worker(progress_tacker=tgext.asyncjob.trackers.redisdb.RedisProgressTracker(host='localhost'))

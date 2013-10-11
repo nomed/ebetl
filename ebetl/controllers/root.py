@@ -70,6 +70,24 @@ class ModalController(BaseController):
         return dict(page='modal',id=id, doc_num=doc_num, result=[id])  
 
 
+    @expose('ebetl.templates.modal.b2b_book')
+    def b2b_book(self, id):
+        """"""       
+        validated = DBSession.query(Factb2b).filter(and_(
+            Factb2b.inputb2b_id == id,
+            Factb2b.validated != 1
+        )).all()
+        return dict(page='modal',id=id,validated=validated, result=[id])  
+
+    @expose('ebetl.templates.modal.b2b_book')
+    def b2b_export(self, id):
+        """"""       
+        validated = DBSession.query(Factb2b).filter(and_(
+            Factb2b.inputb2b_id == id,
+            Factb2b.booked != 1
+        )).all()
+        return dict(page='modal',id=id,validated=validated, result=[id])  
+
 class StockController(BaseController):
     """
     """
@@ -263,7 +281,7 @@ class RootController(BaseController):
 
     modal = ModalController()    
     
-    error = ErrorController()
+    #error = ErrorController()
 
     def _before(self, *args, **kw):
         tmpl_context.project_name = "ebetl"
