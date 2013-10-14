@@ -69,8 +69,8 @@ class BookkeepingController(BaseController):
     """
 
     # The predicate that must be met for all the actions in this controller:
-    allow_only = has_permission('manage',
-                                msg=l_('Only for people with the "manage" permission'))
+    #allow_only = has_permission('manage',
+    #                            msg=l_('Only for people with the "manage" permission'))
     
     def _datagrid(self, query_lst , groupby, fltr, ordr=None):
         ret = DBSession.query(*query_lst)
