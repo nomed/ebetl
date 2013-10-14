@@ -115,8 +115,18 @@ class FilconadObj(object):
                     ret.append(txn) 
                              
         return ret
+
+    def get_hash(self, fpath ):
+
+        import md5
+
+        my_f = open(fpath)
+        my_s = my_f.read()
+        my_f.close()
+
+        my_hash = md5.new(my_s).hexdigest()        
         
-        
+        return my_hash
 
     def store_files(self, *args, **kw):
         files = self._get_files()
@@ -124,8 +134,9 @@ class FilconadObj(object):
                 Provenienze.codiceprovenienza==self.prov,
                 Provenienze.tipoprovenienza=="FOR").one()        
         for fpath in files:
-
+            log.debug(fpath)
             fname = os.path.basename(fpath)
+            fname = self.get_hash(fpath)
             try:
                 fobj = DBSession.query(Inputb2b).filter(
                     and_(Inputb2b.filename==fname,
@@ -195,9 +206,9 @@ class FilconadObj(object):
                     if res.has_key(src): 
                         newval = getattr(mapper, func)(res[src])
                         factb2b_dict[key] = newval
-                        log.debug("fact_b2b: %s | %s | %s | %s => %s"%(
-                                    src, func, key, res[src], [newval]
-                        ))
+                        #log.debug("fact_b2b: %s | %s | %s | %s => %s"%(
+                        #            src, func, key, res[src], [unicode(newval).encode('utf-8')]
+                        #))
                     else:
                         #log.debug("%s"%(pprint(pricelist)))
                         log.debug("not found: %s [%s]"%(src, key))                        
@@ -241,6 +252,7 @@ class FilconadObj(object):
                 for key, val in factb2b_dict.iteritems():   
                     if key in self.rosetta.keys():
                         val = self.rosetta[key][val]
+                        
                     setattr(fobjrow, key, val)
                 DBSession.add(fobjrow) 
                 

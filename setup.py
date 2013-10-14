@@ -106,7 +106,7 @@ setup(
     #vismara = ebetl.commands.listini.vismara:Vismara 
     #big = ebetl.commands.listini.big:Big           
     #updateconti = ebetl.commands.updateconti:Updateconti
-    #acqmonciotti = ebetl.commands.acqmonciotti:Acqmonciotti
+    acqmonciotti = ebetl.commands.acqmonciotti:Acqmonciotti
     #cei = ebetl.commands.cei:Cei      
     #syncdb = ebetl.commands.syncdb:Syncdb  
     #exportclifor = ebetl.commands.exportclifor:Exportclifor   

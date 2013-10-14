@@ -52,7 +52,10 @@ class B2bObj(object):
         self.jsonmap = json.load(jsonf)
         jsonf.close()      
         
-        self.notfound=self.config.get("%s.notfound"%(self.record))    
+        self.notfound=self.config.get("%s.notfound"%(self.record))  
+        #if not self.notfound :
+        #     self.notfound=self.config.get('ebetl.notfound')  
+        #print self.notfound, self.path_jsonmap
 
     def _get_files(self, *args, **kw):
         orlist = []
@@ -77,10 +80,11 @@ class B2bObj(object):
         Factb2b.instablog == Movimentit.numeromovimento
         Factb2b.updtablog == Movimentir.numeromovimento
         
-        """   
+        """  
+        print "========================== STARTED" 
         # get files to process
         files = DBSession.query(Inputb2b).filter(
-            and_(Inputb2b.export==1,or_(Inputb2b.exported==0, Inputb2b.exported==None))).all()
+            and_(Inputb2b.booked==1,or_(Inputb2b.exported==0, Inputb2b.exported==None))).all()
         vat = {}  
         log.info("export : found %s to process"%(len(files)))           
         for i in files:
@@ -245,7 +249,7 @@ class B2bObj(object):
                     recrobj.prezzo = recrobj.prezzonetto * vat[r.b2b_vat_code].mult
                     recrobj.ivaprezzo = recrobj.prezzo - recrobj.prezzonetto
                     recrobj.sincrofield = DBSession.execute(contasincrofield)
-                    
+                    print r.cost_center_code
                     cc = DBSession.query(Magazzini).filter_by(codicemagazzino=r.cost_center_code).one()
                     
                     recrobj.numeromagazzino = cc.numeromagazzino
@@ -294,7 +298,7 @@ class B2bObj(object):
             for res in results:
                 factb2b_dict = {}
                 #factb2b_dict['supplier_id'] = prov.numeroprovenienza
-                import pprint; pprint.pprint(results)
+                #import pprint; pprint.pprint(results)
                 for key, val in self.jsonmap.iteritems():
                     src, func = val
                     newval = getattr(mapper, func)(res[src])
@@ -309,13 +313,13 @@ class B2bObj(object):
               
                 and_c = and_(
                                  Factb2b.supplier_id==factb2b_dict['supplier_id'],
-                                 Factb2b.inputb2b_id==factb2b_dict['doc_id'],
+                                 Factb2b.doc_id==factb2b_dict['doc_id'],
                                  #Factb2b.header==factb2b_dict['header'],
                                  #Factb2b.doc_num==factb2b_dict['doc_num'],
                                  #Factb2b.rec_num==factb2b_dict['rec_num'],
                                  #Factb2b.b2b_sale_type==factb2b_dict['b2b_sale_type'],
                                  #Factb2b.b2b_code==factb2b_dict['b2b_code'],
-                                 Factb2b.row==factb2b_dict['doc_row'],
+                                 Factb2b.doc_row==factb2b_dict['doc_row'],
                                  )  
 
 
@@ -325,16 +329,18 @@ class B2bObj(object):
                     log.debug("fact_b2b: found row id %s"%(fobjrow.b2b_id))
                                 
                 except:
-
                     fobjrow = Factb2b()  
                     log.debug("fact_b2b: row NOT found")                   
 
 
                 setattr(fobjrow, "account_code", self.notfound )
 
-                for key, val in factb2b_dict.iteritems():                        
-                    setattr(fobjrow, key, val)
-
+                for key, val in factb2b_dict.iteritems():
+                    if val:                        
+                        setattr(fobjrow, key, val)
+                fobjrow.booked = 1
+                fobjrow.validated = 1
+                fobjrow.closed = 1
                 DBSession.add(fobjrow) 
                 
                 #print fobjrow,fobjrow.doc_num                
