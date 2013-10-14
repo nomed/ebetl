@@ -84,6 +84,7 @@
     <tr>
       <th class="text-right">Cost Center</th>          
       <th class="text-right">Account Num</th>     
+      <th class="text-right">Account</th>        
       <th class="text-right">Vat</th>	 
       <th class="text-right">Lines</th>      
       <th class="text-right">Net Total</th>  
@@ -95,26 +96,30 @@
 
     <py:for each="row in results['account_code']">
     <tr class="">
-        <td class="text-right" py:for="r in row[1:4]">${[r]}</td>                    
-        <td class="text-right" py:for="r in row[4:6]">${todecimal(r or 0)}</td>                    
-        <td class="text-right" py:for="r in row[6:]">${todecimal(r or 0)}</td>                    
+        <td class="text-right" py:for="r in row[1:5]">${[r]}</td>                    
+        <td class="text-right" py:for="r in row[5:7]">${todecimal(r or 0)}</td>                    
+        <td class="text-right" py:for="r in row[7:]">${todecimal(r or 0)}</td>                    
     </tr>    
     </py:for>
 
     <tr>
-        
+        <th class="text-right"></th>  
+        <th class="text-right"></th>                
         <th class="text-right"></th>    
         <th class="text-right"></th>        
         <th class="text-right"></th>        
         <th class="text-right"></th>        
         <th class="text-right"></th>        
-        <th class="text-right"></th>                                        
+        <th class="text-right"></th>   
+        <th class="text-right"></th>   
+        <th class="text-right"></th>                                                        
     </tr>
     
     <tr >
       
       <th class="text-right">Cost Center</th>          
       <th></th>
+      <th></th>      
       <th class="text-right">Vat</th>      
       <th class="text-right">Lines</th>            
       <th class="text-right">Net Total</th>  
@@ -127,23 +132,29 @@
     <py:for each="row in results['vat_code']">
     <tr >
         <td class="text-right" py:for="r in row[1:2]">${[r]}</td>                    
+      
         <td></td>
+        <td></td>         
         <td class="text-right" py:for="r in row[2:4]">${[r]}</td> 
         <td class="text-right" py:for="r in row[4:]">${todecimal(r or 0)}</td>                    
     </tr>    
     </py:for>
     <tr >
-        <th class="text-right"></th>          
+        <th class="text-right"></th>  
+        <th class="text-right"></th>                
         <th class="text-right"></th>    
         <th class="text-right"></th>        
         <th class="text-right"></th>        
         <th class="text-right"></th>        
         <th class="text-right"></th>        
-        <th class="text-right"></th>                                        
+        <th class="text-right"></th>   
+        <th class="text-right"></th>   
+        <th class="text-right"></th>                                       
     </tr>
     <tr class="success">
         <th></th>      
-        <th></th>          
+        <th></th>     
+        <th></th>               
         <th class="text-right">Totals</th>        
         <py:for each="row in results['total']" >
         <th class="text-right" py:for="r in row[6:7]" >${[r]}</th>

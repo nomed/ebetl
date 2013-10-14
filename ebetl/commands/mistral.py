@@ -27,7 +27,8 @@ class Mistral(Command):
     #              help="")
     parser.add_option("-x", "--x",
                   action="store_true", dest="export",
-                  help="")                 
+                  help="")  
+                                 
     (options, args) = parser.parse_args()
     
     def command(self):

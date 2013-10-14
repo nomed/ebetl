@@ -31,6 +31,11 @@ except:
     from ordereddict import OrderedDict
 
 from tg.predicates import has_permission
+
+from tgext.asyncjob import asyncjob_perform
+
+def testme(arg):
+    print "====================== TESTME"
     
 __all__ = ['B2bController']
 
@@ -55,6 +60,41 @@ class B2bController(BaseController):
     def new(self, format='html'):
         """GET /stocks/new: Form to create a new item"""
         # url('new_stock')
+
+    @expose()
+    def export(self, id, *args, **kw):
+        """PUT /stocks/id: Update an existing item"""
+        # Forms posted to this method should contain a hidden field:
+        #    <input type="hidden" name="_method" value="PUT" />
+        # Or using helpers:
+        #    h.form(url('stock', id=ID),
+        #           method='put')
+        # url('stock', id=ID)
+        #DBSession.query(Inputb2b).filter(
+        #                            Inputb2b.b2b_id==id).update(dict(exported=1))
+        from ebetl.lib.etl.b2b import B2bObj                                    
+        b2bobj=B2bObj(config)                  
+        #b2bobj.write_out()
+        #if self.options.export:
+        
+        print asyncjob_perform(testme, 2)
+        return redirect(url('/b2b/show/%s'%id))
+
+
+    @expose()
+    def book(self, id, *args, **kw):
+        """PUT /stocks/id: Update an existing item"""
+        # Forms posted to this method should contain a hidden field:
+        #    <input type="hidden" name="_method" value="PUT" />
+        # Or using helpers:
+        #    h.form(url('stock', id=ID),
+        #           method='put')
+        # url('stock', id=ID)
+        DBSession.query(Inputb2b).filter(
+                                    Inputb2b.b2b_id==id).update(dict(booked=1))
+        DBSession.query(Factb2b).filter_by(inputb2b_id=id).update(dict(booked=1))
+
+        return redirect(url('/b2b/show/%s'%id))
 
     @expose()
     def update(self, id):
