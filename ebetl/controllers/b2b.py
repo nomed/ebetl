@@ -44,8 +44,8 @@ class B2bController(BaseController):
     """
 
     # The predicate that must be met for all the actions in this controller:
-    allow_only = has_permission('manage',
-                                msg=l_('Only for people with the "manage" permission'))
+    #allow_only = has_permission('manage',
+    #                            msg=l_('Only for people with the "manage" permission'))
 
     @expose('ebetl.templates.b2b')
     def index(self):
