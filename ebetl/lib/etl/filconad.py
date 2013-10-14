@@ -206,9 +206,9 @@ class FilconadObj(object):
                     if res.has_key(src): 
                         newval = getattr(mapper, func)(res[src])
                         factb2b_dict[key] = newval
-                        log.debug("fact_b2b: %s | %s | %s | %s => %s"%(
-                                    src, func, key, res[src], [newval]
-                        ))
+                        #log.debug("fact_b2b: %s | %s | %s | %s => %s"%(
+                        #            src, func, key, res[src], [unicode(newval).encode('utf-8')]
+                        #))
                     else:
                         #log.debug("%s"%(pprint(pricelist)))
                         log.debug("not found: %s [%s]"%(src, key))                        

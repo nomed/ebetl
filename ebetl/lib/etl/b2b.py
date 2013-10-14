@@ -338,7 +338,9 @@ class B2bObj(object):
                 for key, val in factb2b_dict.iteritems():
                     if val:                        
                         setattr(fobjrow, key, val)
-
+                fobjrow.booked = 1
+                fobjrow.validated = 1
+                fobjrow.closed = 1
                 DBSession.add(fobjrow) 
                 
                 #print fobjrow,fobjrow.doc_num                

@@ -16,7 +16,13 @@ mappers = [dict(
                 record = "filconad_bor",
                 gid_mapper = 0,
                 gid_target = 2
-           )
+           ),
+           dict(
+                output = "0Ar5Lp6pxOuLJdGFJWUhUUGR5YmQ3WEZ1ams0aWN6cHc",
+                record = "filconad_cen",
+                gid_mapper = 0,
+                gid_target = 2
+           )           
            ]
 
 for mapper in mappers:

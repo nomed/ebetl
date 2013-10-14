@@ -337,7 +337,7 @@ class Db2Mistral(object):
     def get_mov2(self,codmov, *args, **kw):
         orlist = []
         log.debug("get_mov: %s"%codmov)
-        sys.exit()
+
         for c in codmov:
             orlist.append(Movimentit.codicemovimento==c)
         movst = DBSession.query(Movimentit).filter(
@@ -372,7 +372,7 @@ class Db2Mistral(object):
                     contoobj=DBSession.query(Conticontabilita).filter_by(
                     		numerocontocontabilita=numconto).one()
                     r_conto=contoobj.codicecontocontabilita
-                    print r_conto
+                    #print r_conto
                 except:
                     #raise
                     r_conto='1601000001'
@@ -424,6 +424,7 @@ class Db2Mistral(object):
             doc_dict=dict(h=h,r=docr,f=moviva)
             ret.append(doc_dict)
             m.numerotipopagamento=3
+            m.controllonote=10
             DBSession.add(m)
         return ret
 
@@ -502,7 +503,7 @@ class Db2Mistral(object):
             
         return headers, lines
                
-    def write_out_old(self,*args, **kw):
+    def write_out2(self,*args, **kw):
         opath=self.config.get('mistral.path_output') 
         log.debug("opath: %s"%(opath))
         fname=self.config.get('mistral.filename')
@@ -511,7 +512,8 @@ class Db2Mistral(object):
         log.debug("fout: %s"%fout)
         
         fobj=open(fout,'wr')
-        ret = self.get_mov(self.codmov)
+        ret = self.get_mov2(self.codmov)
+        print ret
         #tmpl = self.loader_genshi.load('index.html')
         if True:
             for d in ret:
