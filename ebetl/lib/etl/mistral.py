@@ -62,7 +62,6 @@ import transaction
 from pprint import PrettyPrinter
 import csv
 
-
 vat_total = Factb2b.b2b_net_total * Factb2b.b2b_vat_code/100
 gross_total = Factb2b.b2b_net_total + vat_total
 COLUMNS_H = [
@@ -243,6 +242,7 @@ class Db2Mistral(object):
         for k,v in data['r'].iteritems():
             for mag, ivadict in v.iteritems():
                 for iva, tot in ivadict.iteritems():
+                    iva = iva.zfill(2)
                     r=ret
                     r=r+get_fixedwidth(k,16)  
                     r=r+get_fixednum(tot,16)

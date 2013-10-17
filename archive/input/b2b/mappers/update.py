@@ -6,11 +6,23 @@ import csv
 url_str='https://docs.google.com/spreadsheet/pub?key=%s&single=true&gid=%s&output=csv'
 
 mappers = [dict(
-               output="0Ar5Lp6pxOuLJdGdWbkNpZTdILXRSVDV4NUJCVUVOYmc",
-               record = "dbretail",
+               output="0Ar5Lp6pxOuLJdG1mY3FIWEtkeVo4SkNhR0V2RkRXMUE",
+               record = "filconad_big",
                gid_mapper = 0,
                gid_target = 2
                ),
+           dict(
+                output = "0Ar5Lp6pxOuLJdElzQ09HLWlxLTJpN1VTd0xPMUxmLUE",
+                record = "filconad_bor",
+                gid_mapper = 0,
+                gid_target = 2
+           ),
+           dict(
+                output = "0Ar5Lp6pxOuLJdGFJWUhUUGR5YmQ3WEZ1ams0aWN6cHc",
+                record = "filconad_cen",
+                gid_mapper = 0,
+                gid_target = 2
+           )           
            ]
 
 for mapper in mappers:
