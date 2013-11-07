@@ -459,8 +459,8 @@ class Db2Mistral(object):
             h['data']=get_data(dataobj) # AAAAMMDD | ['20130611'] | l8
             h['codfor']=codfor # ['      000795'] | l12
             h['numdoc']=numdoc # ['        257R'] | l12
-            h['gross']=m[4]
-            h['net']=m[6]
+            h['gross']=m[6]
+            h['net']=m[4]
             h['doccode']='FATFOR'
             headers.append(h)
             
