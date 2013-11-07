@@ -307,7 +307,7 @@ class B2bObj(object):
                             src, func, key, 
                             unicode(str(res[src]), errors='replace'),
                             
-                            [str(newval).decode("utf8")]
+                            [str(newval).decode("latin-1")]
                 ))
                      
               

@@ -439,6 +439,7 @@ class Db2Mistral(object):
                     Factb2b.doc_date, Factb2b.doc_num]
         query_lst = groupby + COLUMNS_H
         fltr = [and_(Factb2b.booked==1,
+	             Factb2b.closed!=1,
                      Factb2b.supplier_id==Provenienze.numeroprovenienza)]              
         movst = self._datagrid(query_lst, groupby, fltr)           
 

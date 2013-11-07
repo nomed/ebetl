@@ -80,6 +80,7 @@ class FilconadObj(object):
     def _get_files(self, *args, **kw):
         ret = []
         dir_all = glob.glob(self.path_file)
+        print dir_all
         print self.path_file
         dir_all.sort()
         
@@ -132,7 +133,8 @@ class FilconadObj(object):
         files = self._get_files()
         prov = DBSession.query(Provenienze).filter(
                 Provenienze.codiceprovenienza==self.prov,
-                Provenienze.tipoprovenienza=="FOR").one()        
+                Provenienze.tipoprovenienza=="FOR").one()       
+         
         for fpath in files:
             log.debug(fpath)
             fname = os.path.basename(fpath)
