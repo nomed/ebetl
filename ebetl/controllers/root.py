@@ -299,7 +299,10 @@ class RootController(BaseController):
         
         try:
             pk = kw.get('pk')
-            value = float(kw.get('value'))     
+            value = kw.get('value')
+            if not value:
+                value = '0'
+            value = float(value)
             name = kw.get('name')
             doc_id, prod_id = pk.split('/')
             if name == 'qta' or name == 'qtaconf':
@@ -314,8 +317,14 @@ class RootController(BaseController):
                     ic = Inventarirconta(numeroinventario=doc_id, numeroprodotto=prod_id)
                     ic.qta = 0
                     ic.qtaconf = 0
-                    ic.costo = gcogs(prod_id, d.numeromagazzino ,date=d.datainventario)
+                    #ic.costo = gcogs(prod_id, d.numeromagazzino ,date=d.datainventario)
                     ic.costo2 = 0
+                if not ic.costo:
+                    ic.costo = 0
+                if not ic.qta:
+                    ic.qta = 0
+                if not ic.qtaconf:
+                    ic.qtaconf = 0
                 setattr(ic,name,value)    
                 pzxc = p.pezzixcollo or 1                
                 ic.totale_qta = ic.qta+ic.qtaconf*pzxc
