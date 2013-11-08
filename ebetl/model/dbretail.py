@@ -65,7 +65,6 @@ class Provenienze(DeclarativeBase):
     email=Column(String(30))
     prodottiprovenienza = Column(Integer)
 
-
 class Listini(DeclarativeBase):
     __tablename__ = 'listini'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)    
@@ -115,8 +114,7 @@ class Sottoscorta(DeclarativeBase):
     numeroeanprodotto = Column(Integer, ForeignKey('eanprodotti.numeroeanprodotto'))
     qtascorta = Column(Float)
     qtariordino = Column(Float)  
-
-    
+   
 class Prodotti(DeclarativeBase):
     __tablename__ = 'prodotti'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True)
@@ -125,6 +123,7 @@ class Prodotti(DeclarativeBase):
     prodottobreve = Column(String(20))
     prodotto = Column(String(40))
     numerotipologiaprodotto = Column(Integer)
+    numeroproduttore = Column(Integer)    
     datainserimento = Column(DateTime)
     varprezzocon = Column(Integer)
     numeroreparto = Column(Integer,ForeignKey('reparti.numeroreparto'))
@@ -223,7 +222,6 @@ class Iva(DeclarativeBase):
     def mult(self):
         return float(1) + float(self.valoreiva)/float(100)
 
-
 class Gruppounitamisure(DeclarativeBase):
     __tablename__ = 'gruppounitamisure'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True)
@@ -245,9 +243,6 @@ class Unitamisure(DeclarativeBase):
     def udm(self):
         return pow(10, self.moltiplicatoreunita)
 
-
- 
-
 class Eanprodotti(DeclarativeBase):
     __tablename__ = 'eanprodotti'
     numeroeanprodotto = Column(Integer,Sequence('contaeanprodotto'), autoincrement=True, primary_key=True)
@@ -265,7 +260,6 @@ class Eanprodotti(DeclarativeBase):
     prezzovariabilebilancia=Column(Integer)
     qtaxconf = Column(Integer)
     
- 
 class Prodottiprovenienze(DeclarativeBase):
     __tablename__ = 'prodottiprovenienze'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
@@ -282,9 +276,7 @@ class Prodottiprovenienze(DeclarativeBase):
     ordine = Column(Integer)
     provenienza = relation('Provenienze', backref=backref('referenze', 
                                           order_by=codiceprodottoprovenienza))        
-     
-
-    
+        
 class Movimentit(DeclarativeBase):
     __tablename__='movimentit'
     #logicdelete
@@ -386,9 +378,6 @@ class Movimentit(DeclarativeBase):
     #numerolistino
     protocollo=Column(String(20))
     elaborato = Column(Integer)
-
-
-
 
 class Movimentir(DeclarativeBase):
     __tablename__='movimentir'
@@ -522,8 +511,7 @@ class Ricevutet(DeclarativeBase):
     camerieri = Column(String(150))
     qtaunicariga = Column(Float)
     descrizioneunicariga = Column(String(150))
-    
-    
+       
 class Movimentiiva(DeclarativeBase):
     __tablename__ = 'movimentiiva'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)    
@@ -548,8 +536,6 @@ class Pagamenti(DeclarativeBase):
     importo = Column(Float)
     #pk  
     
-
-
 class Movimentifid(DeclarativeBase):
     __tablename__ = 'movimentifid'
     #logicdelete
@@ -615,8 +601,6 @@ class Clientifid(DeclarativeBase):
 
             ret = ret + m.punti
         return ret
-
-
 
 class Inventarit(DeclarativeBase):
     __tablename__='inventarit'
@@ -727,11 +711,12 @@ class Alias(DeclarativeBase):
     sincroserverfield = Column(Integer)
     numeroalias = Column(Integer, contaalias,  autoincrement=True,primary_key=True)    
     tipoprodotto = Column(Unicode(3), default=u'PRD') 
-    numeroprodotto = Column(Integer)
-    numeroeanprodotto=Column(Integer)
+    numeroprodotto = Column(Integer, ForeignKey('prodotti.numeroprodotto'))
+    prodotto = relation('Prodotti', backref='aliases')    
+    numeroeanprodotto=Column(Integer, ForeignKey('eanprodotti.numeroeanprodotto'))
+    eanprodotto = relation('Eanprodotti', backref='aliases')      
     alias = Column(Unicode(30))
-    
-    
+       
 class Inputb2b(DeclarativeBase):
     __tablename__='input_b2b'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True)
@@ -750,8 +735,21 @@ class Inputb2b(DeclarativeBase):
     acquired = Column(DateTime, default=datetime.now())
     updated = Column(DateTime, default = datetime.now())
     
-  
-  
+class Tipologieprodotti(DeclarativeBase):
+    __tablename__='tipologieprodotti'
+    sincrofield = Column(Integer, contasincrofield , autoincrement=True)
+    sincroserverfield = Column(Integer)
+    numerotipologiaprodotto = Column(Integer, autoincrement=True,primary_key=True)        
+    codicetipologiaprodotto = Column(Integer)    
+    tipologiaprodotto = Column(Unicode(50)) 
+
+
+class Produttori(DeclarativeBase):
+    __tablename__='produttori'
+    sincrofield = Column(Integer, contasincrofield , autoincrement=True)
+    sincroserverfield = Column(Integer)
+    numeroproduttore = Column(Integer, autoincrement=True,primary_key=True)           
+    produttore = Column(Unicode(50))     
   
 
 

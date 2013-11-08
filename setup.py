@@ -68,7 +68,8 @@ setup(
     entry_points="""
     [paste.app_factory]
     main = ebetl.config.middleware:make_app
-
+    [gearbox.plugins]
+    turbogears-devtools = tg.devtools
     [paste.app_install]
     main = pylons.util:PylonsInstaller
     
@@ -76,7 +77,7 @@ setup(
     filconad = ebetl.commands.filconad:Filconad
     mistral = ebetl.commands.mistral:Mistral   
     b2b = ebetl.commands.b2b:B2b    
-    
+    starlogic = ebetl.commands.starlogic:Starlogic
     
     
     #fatmicro = ebetl.commands.fatmicro:Fatmicro

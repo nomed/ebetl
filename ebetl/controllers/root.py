@@ -27,7 +27,7 @@ from sqlalchemy import func
 
 from ebetl.controllers.bookkeeping import BookkeepingController
 from ebetl.controllers.b2b import B2bController
-
+from ebetl.controllers.marketing import MarketingController, RepartiController, TipologieController, ProduttoriController
 try:
     from collections import OrderedDict
 except:
@@ -278,8 +278,16 @@ class RootController(BaseController):
     b2b = B2bController()
     
     bookkeeping = BookkeepingController()
+    
+    marketing = MarketingController()
 
-    modal = ModalController()    
+    modal = ModalController() 
+    
+    reparti = RepartiController()   
+
+    tipologie = TipologieController() 
+    
+    produttori = ProduttoriController()     
     
     #error = ErrorController()
 
@@ -314,7 +322,7 @@ class RootController(BaseController):
                     ic = Inventarirconta(numeroinventario=doc_id, numeroprodotto=prod_id)
                     ic.qta = 0
                     ic.qtaconf = 0
-                    ic.costo = gcogs(prod_id, d.numeromagazzino ,date=d.datainventario)
+                    #ic.costo = gcogs(prod_id, d.numeromagazzino ,date=d.datainventario)
                     ic.costo2 = 0
                 setattr(ic,name,value)    
                 pzxc = p.pezzixcollo or 1                

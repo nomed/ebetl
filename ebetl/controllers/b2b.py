@@ -32,7 +32,7 @@ except:
 
 from tg.predicates import has_permission
 
-from tgext.asyncjob import asyncjob_perform
+#from tgext.asyncjob import asyncjob_perform
 
 def testme(arg):
     print "====================== TESTME"
@@ -77,7 +77,7 @@ class B2bController(BaseController):
         #b2bobj.write_out()
         #if self.options.export:
         
-        print asyncjob_perform(testme, 2)
+        #print asyncjob_perform(testme, 2)
         return redirect(url('/b2b/show/%s'%id))
 
 

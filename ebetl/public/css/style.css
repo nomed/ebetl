@@ -61,14 +61,3 @@ code {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
-
-@media print {
-    /* your stylesheet for printing, eg.: */
-.collapse {
-display: block;
-}
-.panel {
-page-break-before: always;
-}
-
-}
