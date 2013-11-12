@@ -36,7 +36,7 @@ class Mistral(Command):
         if self.options.export:
             mistralobj=Db2Mistral(config)
             mistralobj.write_out2()            
-            #mistralobj.write_out()
+            mistralobj.write_out()
             #set_account_from_rep2()
         #if self.options.pc:
         #    #mistralobj=Db2Mistral(config)
