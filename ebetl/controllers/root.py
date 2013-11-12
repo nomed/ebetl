@@ -132,6 +132,34 @@ class StockController(BaseController):
            
         return dict(page='stock', doc=doc, result=result)            
 
+    @expose()
+    def updatecost(self, id):
+        """GET /stocks/id: Show a specific item"""       
+        #result = views.get_stock_cogs(id)
+        doc = DBSession.query(Inventarit).filter(Inventarit.numeroinventario==id).one()
+        invs = DBSession.query(Inventarirconta).filter(Inventarirconta.numeroinventario==id).all()
+        for ic in invs:
+		    ic.costo, ic.datacosto = gcogs(ic.numeroprodotto, doc.numeromagazzino ,date=doc.datainventario)
+		    if not ic.costo2  or ic.costo2 == 0:
+				ic.costo2 = ic.costo
+		    DBSession.add(ic)
+        redirect('/stock/show/'+id)    
+    @expose()
+    def updatecost2(self, id):
+        """GET /stocks/id: Show a specific item"""       
+        
+        doc = DBSession.query(Inventarit).filter(Inventarit.numeroinventario==id).one()        
+        views.get_latest_cogs_all(doc.numeromagazzino ,date=doc.datainventario)
+        redirect('/stock/show/'+id) 
+
+    @expose('ebetl.templates.stock_show_cost')
+    def showcost(self, id, *args):
+        """GET /stocks/id: Show a specific item"""       
+        result = views.get_stock_cogs(id, *args)
+        doc = DBSession.query(Inventarit).filter(Inventarit.numeroinventario==id).one()
+           
+        return dict(page='stock', doc=doc, result=result) 
+
     def edit(self, id, format='html'):
         """GET /stocks/id/edit: Form to edit an existing item"""
         # url('edit_stock', id=ID)           
@@ -341,6 +369,29 @@ class RootController(BaseController):
                 kw['totale_qta']=todecimal(ic.totale_qta )
                 kw['costo'] = todecimal(ic.costo)
                 DBSession.add(ic)
+            elif name == 'costo2':
+                p = DBSession.query(Prodotti).filter_by(numeroprodotto = prod_id).one()
+                d = DBSession.query(Inventarit).filter_by(numeroinventario = doc_id).one()
+                ic = DBSession.query(Inventarirconta).filter(and_(
+                        Inventarirconta.numeroinventario == doc_id,
+                        Inventarirconta.numeroprodotto == prod_id
+                        )).one()
+                
+                if not ic.costo:
+                    ic.costo = 0
+                #if not ic.qta:
+                #    ic.qta = 0
+                #if not ic.qtaconf:
+                #    ic.qtaconf = 0
+                setattr(ic,name,value)
+                print name, value 
+                print ic.costo, ic.costo2   
+                #pzxc = p.pezzixcollo or 1                
+                #ic.totale_qta = ic.qta+ic.qtaconf*pzxc
+                ic.totale_costo=ic.totale_qta*ic.costo2                
+                kw['totale_costo'] = todecimal(ic.totale_costo )                
+                #kw['costo'] = todecimal(ic.costo)
+                DBSession.add(ic)                
         except:
             raise
             pylons.response.status = "400 Error"

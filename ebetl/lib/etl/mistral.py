@@ -512,7 +512,7 @@ class Db2Mistral(object):
         fout=os.path.join(opath,fname)
         log.debug("fout: %s"%fout)
         
-        fobj=open(fout,'wr')
+        fobj=open(fout,'a')
         ret = self.get_mov2(self.codmov)
         print ret
         #tmpl = self.loader_genshi.load('index.html')
@@ -545,7 +545,7 @@ class Db2Mistral(object):
         fout=os.path.join(opath,fname)
         log.debug("fout: %s"%fout)
         
-        fobj=open(fout,'wr')
+        fobj=open(fout,'a')
         headers, ret = self.get_mov(self.codmov)
         
         for r in ret:

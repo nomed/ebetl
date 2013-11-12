@@ -133,6 +133,7 @@ class Prodotti(DeclarativeBase):
     numerounitamisura = Column(Integer, ForeignKey('unitamisure.numerounitamisura'))
     unitamisura = relation('Unitamisure', backref='prodotti')         
     costonetto = Column(Float)
+    dataultimocosto = Column(DateTime)
     pezzixcollo=Column(Float)
     qtacontenuto = Column(Float)
     numeroumvisualizzazione = Column(Integer)
@@ -479,7 +480,7 @@ class Movimentir(DeclarativeBase):
     #deposito
     #numerocausalescarto
     #rigaannullata
-    chiusura = Column(Float)
+    chiusura = Column(DateTime)
     #dataconfezionamento
     #datascadenza
     #misure
@@ -677,6 +678,8 @@ for p in ps:
         return perms  
     """      
 
+
+
 class Inventarirconta(DeclarativeBase):
     __tablename__='inventarirconta'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
@@ -694,7 +697,8 @@ class Inventarirconta(DeclarativeBase):
     costo = Column(Float, default=0)
     costo2 = Column(Float, default=0) 
     totale_qta = Column(Float, default=0)       
-    totale_costo = Column(Float, default=0)     
+    totale_costo = Column(Float, default=0) 
+    datacosto = Column(DateTime)    
     """
     @property
     def cost(self):
@@ -704,6 +708,15 @@ class Inventarirconta(DeclarativeBase):
             perms = perms | set(g.permissions)
         return perms  
     """    
+
+# document final price
+totale_costo = Inventarirconta.costo * Inventarirconta.totale_qta
+totale_costo2 = Inventarirconta.costo2 * Inventarirconta.totale_qta
+
+COSTI = [
+        label('totale_costo', func.sum(totale_costo)),
+        label('totale_costo2', func.sum(totale_costo2)),
+        ]
 
 class Alias(DeclarativeBase):
     __tablename__='alias'

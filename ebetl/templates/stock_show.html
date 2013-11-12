@@ -149,7 +149,7 @@ from ebetl.controllers.root import todecimal
         </td> 
         <td class="text-right">   
             <span id="totale_costo$doc.numeroinventario/$prod.numeroprodotto" >
-            <py:if test="inv"><b>${todecimal(inv.totale_costo)}</b></py:if>
+            <py:if test="inv"><b>${todecimal(inv.costo*inv.totale_qta)}</b></py:if>
             </span>
         </td>     
                                     
@@ -166,6 +166,7 @@ from ebetl.controllers.root import todecimal
 </py:if> <!-- if dim -->   
   </div>
 </div>
+
 
     <script src="/js/stock.js"></script>
 

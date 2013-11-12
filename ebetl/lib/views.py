@@ -37,7 +37,7 @@ def get_stock(id, *args, **kw):
                                         Inventarirconta.numeroinventario==id) )   
     #ret = ret.join(Reparti, Prodotti.numeroreparto == Reparti.numeroreparto)
     ret = ret.filter(Inventarir.numeroinventario==id)
-    print ret
+    #print ret
     ret = ret.order_by(Prodotti.numeroreparto, Prodotti.prodotto).all() 
     
     ret = groupby(ret, level2) 
@@ -49,6 +49,31 @@ def get_stock(id, *args, **kw):
             results[cat][prod] = values
     return results
 
+
+
+def get_stock_cogs(id, *args, **kw):
+    """
+    """
+    def level1( item ): 
+        return (item[1], item[0])
+    def level2( item ): 
+        return item[1].reparto
+    ret = None
+    ret = DBSession.query(Inventarirconta, Prodotti).filter(Inventarirconta.numeroinventario==id)
+    ret = ret.outerjoin(Prodotti, and_(Prodotti.numeroprodotto == Inventarirconta.numeroprodotto)) 
+    ret = ret.order_by(Prodotti.numeroreparto, Prodotti.prodotto).all() 
+    
+    ret = groupby(ret, level2) 
+    results = OrderedDict()
+    for cat, products in ret:
+        #prods = [x for x in products]
+        results[cat] = []
+        for inv,prod in products:
+            #
+            results[cat].append((prod,inv))
+            			
+    return results
+    
 def get_pricelist(id, date=None, *args, **kw):
     """
     """
@@ -117,25 +142,43 @@ def get_latest_cogs(prod_id, cost_center_id, date=None):
     if not date:
         date=datetime.now()
         
-    ret_query = DBSession.query(Movimentir,Movimentit).filter(and_(
+    ret_query = DBSession.query(Movimentir,Movimentit).order_by(Movimentit.datadocumento).filter(and_(
         Movimentir.numeromagazzino==cost_center_id,
         Movimentir.codiceqta=='CARICO',
         Movimentit.datadocumento<=date,  
-        Movimentir.idprodotto==prod_id,             
+        #Movimentir.idprodotto==prod_id, 
+        Movimentir.idprodotto==prod_id, 
+        Movimentit.numeromovimento>=0,
+        Movimentit.numeroazienda>=0,
+        Movimentit.tipodocumento=='CAR',
+        Movimentir.numerorigamovimento>=0,
+        Movimentir.numeromovimento>=0
         )).join(Movimentit, 
             Movimentir.numeromovimento == Movimentit.numeromovimento
-         ).order_by(Movimentit.datadocumento)
-    print ret_query
-    
+         ).limit(1)
+    #print ret_query
+    print prod_id, date
     ret = ret_query.first()
     if ret:
         mov, doc = ret
     else:
         mov = None
+    latest_cost = 0
+    cost_date = None
     if mov:
-        return float(0) or mov.prezzo
-    else:
-        return float(0)
+        if mov.prezzo:
+			latest_cost = mov.prezzo
+			cost_date = mov.movimento.datadocumento
+			
+    if latest_cost == 0:
+		if mov:
+			if mov.prodotto:
+				latest_cost = mov.prodotto.costonetto
+				cost_date = mov.prodotto.dataultimocosto
+    return latest_cost, cost_date
+
+
+
 
 def get_latest_fact_cogs(DBSession, prod_id, cost_center_id, date=None):
     if not date:

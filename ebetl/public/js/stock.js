@@ -38,6 +38,20 @@ $('#qty a#qtaconf').editable({
     
 });
 
+$('#cost a#costo2').editable({
+    type: 'text',
+    name: 'costo2',
+    url: '/post',
+    title: 'Enter QTY',
+
+    success: function(response, newValue) {
+        data = $.parseJSON(response);
+        //strid = 'cost2'+data.pk 
+        //document.getElementById(strid).innerHTML = data.costo2        
+        console.log(data)        
+        }  
+});
+
 
 //$(function () {
 //    $('#fileupload').fileupload({
