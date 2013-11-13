@@ -142,7 +142,7 @@ def get_latest_cogs(prod_id, cost_center_id, date=None):
     if not date:
         date=datetime.now()
         
-    ret_query = DBSession.query(Movimentir,Movimentit).order_by(Movimentit.datadocumento).filter(and_(
+    ret_query = DBSession.query(Movimentir,Movimentit).order_by(Movimentit.datadocumento.desc()).filter(and_(
         Movimentir.numeromagazzino==cost_center_id,
         Movimentir.codiceqta=='CARICO',
         Movimentit.datadocumento<=date,  

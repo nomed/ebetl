@@ -55,5 +55,5 @@ class Updatecosts(Command):
                     ic.costo2 = ic.costo
                 if ic.prodotto:
                     print "%s %s %s %s"%(ic.prodotto.codiceprodotto,ic.prodotto.prodotto, ic.datacosto, ic.costo, ic.costo2)
-            DBSession.add(ic)       
+                DBSession.add(ic)       
         transaction.commit()
