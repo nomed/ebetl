@@ -707,7 +707,18 @@ class Inventarirconta(DeclarativeBase):
         for g in self.groups:
             perms = perms | set(g.permissions)
         return perms  
-    """    
+    """  
+    
+class Aggiornaic(DeclarativeBase):
+    __tablename__='aggiornaic'
+    sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
+    sincroserverfield = Column(Integer)
+    numeroinventario = Column(Integer, ForeignKey('inventarit.numeroinventario')) 
+    inventario = relation('Inventarit', backref='aggiornaic')
+    status = Column(Integer)         
+    email = Column(Unicode(50))
+    richiesta = Column(DateTime)
+    fine = Column(DateTime)
 
 # document final price
 totale_costo = Inventarirconta.costo * Inventarirconta.totale_qta

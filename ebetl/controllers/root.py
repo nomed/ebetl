@@ -145,12 +145,20 @@ class StockController(BaseController):
 		    DBSession.add(ic)
         redirect('/stock/show/'+id)    
     @expose()
-    def updatecost2(self, id):
+    def requestupg(self, id):
         """GET /stocks/id: Show a specific item"""       
-        
-        doc = DBSession.query(Inventarit).filter(Inventarit.numeroinventario==id).one()        
-        views.get_latest_cogs_all(doc.numeromagazzino ,date=doc.datainventario)
-        redirect('/stock/show/'+id) 
+    
+        date=datetime.now()        
+        try:
+			obj = DBSession.query(Aggiornaic).filter(Aggiornaic.numeroinventario==id).one()
+        except:
+            obj = Aggiornaic()
+            obj.numeroinventario=id
+        obj.richiesta=date
+        obj.status = 1
+        email = ''
+        DBSession.add(obj)
+        redirect('/stock/showcost/'+id) 
 
     @expose('ebetl.templates.stock_show_cost')
     def showcost(self, id, *args):
