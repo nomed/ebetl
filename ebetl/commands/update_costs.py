@@ -30,7 +30,7 @@ def load_config(args):
     return conf
 
 
-
+import transaction
     
 class Updatecosts(Command):
     summary = "Processa i file cli00 e genera i files OFFERTE.TXT"
@@ -50,10 +50,15 @@ class Updatecosts(Command):
             doc = i.inventario
             invs = DBSession.query(Inventarirconta).filter(Inventarirconta.numeroinventario==doc.numeroinventario).all()
             for ic in invs:
-                ic.costo, ic.datacosto = gcogs(ic.numeroprodotto, doc.numeromagazzino ,date=doc.datainventario)
+                a,b = gcogs(ic.numeroprodotto, doc.numeromagazzino ,date=doc.datainventario)
+                ic.costo = a
+                ic.datacosto = b
                 if not ic.costo2  or ic.costo2 == 0:
                     ic.costo2 = ic.costo
                 if ic.prodotto:
-                    print "%s %s %s %s"%(ic.prodotto.codiceprodotto,ic.prodotto.prodotto, ic.datacosto, ic.costo, ic.costo2)
+                    print "%s %s %s %s %s"%(ic.prodotto.codiceprodotto,ic.prodotto.prodotto, ic.datacosto, ic.costo, ic.costo2)
                 DBSession.add(ic)       
+            i.status = 0
+            DBSession.add(i)
+            
         transaction.commit()
