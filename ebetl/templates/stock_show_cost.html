@@ -1,0 +1,132 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:py="http://genshi.edgewall.org/"
+      xmlns:xi="http://www.w3.org/2001/XInclude">
+
+  <xi:include href="master.html" />
+
+<head>
+  <title>ebetl: Stock</title>
+<?python
+from ebetl.controllers.root import todecimal     
+?>
+
+
+      
+  
+</head>
+
+<body>
+
+<div class="page-header">
+    <ol class="breadcrumb">
+      <li><a href="/">Home</a></li>      
+      <li><a href="/stock">Stock</a></li>  
+      <li><a href="/stock/${doc.numerodocumento}">${doc.numerodocumento}</a></li>                
+    </ol>    
+</div>
+
+
+
+<div class="row">
+	<div class="col-md-3">
+    <ul class="nav nav-pills nav-stacked ">
+     <li class="active"><a href="#"></a></li>
+      <li ><a href="/stock/show/${doc.numeroinventario}">Back to inventory</a></li>
+    </ul>  
+    
+    <div class="panel panel-default">
+		<div class="panel-body">
+		<a href="/stock/requestupg/${doc.numeroinventario}">Update Costs </a>
+		<py:if test="doc.aggiornaic">
+		<p>Update request on ${format_date(doc.aggiornaic[0].richiesta)}</p>
+		<p><py:if test="doc.aggiornaic[0].status == 1">[Updating]</py:if></p>
+		<p><py:if test="doc.aggiornaic[0].status != 1">Updated on ${format_date(doc.aggiornaic[0].fine)}</py:if></p>
+		</py:if>
+		</div>	
+	</div>
+	<p>Num: ${doc.numerodocumento}</p>
+	<p>Date: ${format_date(doc.datainventario)}</p>  
+	<p>Cost Center: ${doc.magazzino.magazzino}</p>
+	<p>Desc: ${doc.descrizione}</p>
+		<div class="list-group">
+			<div >
+			<!--<a py:for="(cat, itertools) in result" 
+				class="list-group-item"
+				href="#${str(cat.numeroreparto).zfill(5)}" 
+				data-toggle="tab">
+				${str(cat.codicereparto).zfill(3)} - $cat.reparto <span class="badge">${len(result[cat])}</span>
+			</a>-->
+			</div>		 
+			<div py:for="cat, items in result.iteritems()">
+			<a class="list-group-item" 
+				href="#${str(cat.numeroreparto).zfill(5)}"  
+				data-toggle="tab">
+				${str(cat.codicereparto).zfill(3)} - $cat.reparto
+			</a>
+			</div>
+		</div>    
+	</div>
+	<div class="col-md-9">
+		<div class="tab-content">
+		<py:for each="cat, products in result.iteritems()">
+		<div id="${str(cat.numeroreparto).zfill(5)}" class="tab-pane active" >
+		<h2>${str(cat.codicereparto).zfill(3)} - $cat.reparto</h2>
+		<table id="cost" class="table table-striped table-bordered table-hover">
+			<thead>
+			<tr>
+				<th class="text-right">Code</th>
+				<th class="">Product</th>
+				<th class="text-right">Uom</th> 
+				<th class="text-right">Latest Cost</th>            
+				<th class="text-right">Date</th>           
+				<th class="text-right">Cost</th>         
+			</tr>
+			</thead>
+			<tbody>       
+			<tr py:for="prod, inv  in products">		
+				<td class="text-right">${prod.codiceprodotto}</td>
+				<td>  
+					<div class="modal fade" id="prod$prod.numeroprodotto" tabindex="-1" role="dialog" aria-labelledby="$prod.prodotto" aria-hidden="true" />        
+					<a data-toggle="modal" data-target="#prod$prod.numeroprodotto" href="/modal/product/$prod.numeroprodotto" >${prod.prodotto}</a> <small py:if="prod.unitamisura">(${prod.qtacontenuto} x ${prod.unitamisura.codiceunitamisura})</small>					
+				</td>
+				<td class="text-right">
+					<table class="table table-striped table-bordered table-hover">
+					<tr>
+						<td>
+						<py:if test="prod.unitamisura">${prod.unitamisura.codiceunitamisura}</py:if>						
+						</td>              									
+					</tr>						
+					</table>
+			   </td>					
+				<td class="text-right">   
+					<span id="cost$doc.numeroinventario/$prod.numeroprodotto" >
+					<py:if test="inv">${todecimal(inv.costo)}</py:if>
+					</span>
+				</td> 
+				<td class="text-right">   
+					<span id="costdate$doc.numeroinventario/$prod.numeroprodotto" >
+					<py:if test="inv">
+						<py:if test="inv.datacosto">${format_date(inv.datacosto)}</py:if></py:if>
+					</span>
+				</td>         
+				<td class="text-right">   
+					<a id="costo2" href="#" data-pk="$doc.numeroinventario/$prod.numeroprodotto" >
+					<py:if test="inv">${todecimal(inv.costo2)}</py:if>
+					</a>
+				</td>  					  										
+			</tr>
+			</tbody>
+		</table>
+		</div>
+		</py:for> 
+		</div> 
+	</div>
+</div>
+
+
+
+    <script src="/js/stock.js"></script>
+
+
+</body>
+</html>
