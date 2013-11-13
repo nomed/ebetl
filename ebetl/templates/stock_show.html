@@ -29,15 +29,24 @@ from ebetl.controllers.root import todecimal
 
 <div class="row">
   <div class="col-md-3">
-    <!--
+    
     <ul class="nav nav-pills nav-stacked ">
      <li class="active"><a href="#"></a></li>
-      <li ><a href="/sales/index/location">By Location</a></li>
-      <li ><a href="/sales/index/product">By Product</a></li>
-      <li><a href="/sales/index/date">By Date (Days)</a></li>     
-      <li><a href="/sales/index/date3">By Date (Weeks)</a></li>         
+      <li ><a href="/stock/showcost/${doc.numeroinventario}">Show costs</a></li>
     </ul>  
-    -->
+
+    <div class="panel panel-default">
+		<div class="panel-body">
+		<a href="/stock/requestupg/${doc.numeroinventario}">Update Costs </a>
+		<py:if test="doc.aggiornaic">
+		<p>Update request on ${format_date(doc.aggiornaic[0].richiesta)}</p>
+		<p><py:if test="doc.aggiornaic[0].status == 1">[Updating]</py:if></p>
+		<p><py:if test="doc.aggiornaic[0].status != 1">Updated on ${format_date(doc.aggiornaic[0].fine)}</py:if></p>
+		</py:if>
+		</div>	
+		
+	</div>
+    
 <p>Num: ${doc.numerodocumento}</p>
 <p>Date: ${format_date(doc.datainventario)}</p>  
 <p>Cost Center: ${doc.magazzino.magazzino}</p>

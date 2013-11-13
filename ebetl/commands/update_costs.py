@@ -46,6 +46,7 @@ class Updatecosts(Command):
     def command(self):
         config=load_config(self.args)
         ics = DBSession.query(Aggiornaic).filter(Aggiornaic.status==1).all()
+        
         for i in ics:
             doc = i.inventario
             invs = DBSession.query(Inventarirconta).filter(Inventarirconta.numeroinventario==doc.numeroinventario).all()
