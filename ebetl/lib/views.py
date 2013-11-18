@@ -74,6 +74,29 @@ def get_stock_cogs(id, *args, **kw):
             			
     return results
     
+def get_stock_report(id, *args, **kw):
+    """
+    """
+    def level1( item ): 
+        return (item[1], item[0])
+    def level2( item ): 
+        return item[1].reparto
+    ret = None
+    ret = DBSession.query(Inventarirconta, Prodotti).filter(Inventarirconta.numeroinventario==id)
+    ret = ret.outerjoin(Prodotti, and_(Prodotti.numeroprodotto == Inventarirconta.numeroprodotto)) 
+    ret = ret.order_by(Prodotti.numeroreparto, Prodotti.prodotto).all() 
+    
+    ret = groupby(ret, level2) 
+    results = OrderedDict()
+    for cat, products in ret:
+        #prods = [x for x in products]
+        results[cat] = []
+        for inv,prod in products:
+            #
+            results[cat].append((prod,inv))
+            			
+    return results    
+    
 def get_pricelist(id, date=None, *args, **kw):
     """
     """

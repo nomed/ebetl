@@ -168,6 +168,86 @@ class StockController(BaseController):
            
         return dict(page='stock', doc=doc, result=result) 
 
+    #@expose('ebetl.templates.stock_show_cost')
+    #def showreport(self, id, *args):
+    #    """GET /stocks/id: Show a specific item"""       
+    #    result = views.get_stock_cogs(id, *args)
+    #    doc = DBSession.query(Inventarit).filter(Inventarit.numeroinventario==id).one()
+    #       
+    #    return dict(page='stock', doc=doc, result=result)
+
+    def _datagrid(self, query_lst , groupby, fltr):
+        ret = DBSession.query(*query_lst)
+        #ret = ret.order_by(Factb2b.row)
+        ret = ret.group_by(*groupby).filter(and_(*fltr))
+        return ret.all()
+ 
+    def _get_joins(self, ret):
+		ret = ret.join(Prodotti, and_(Prodotti.numeroprodotto == Inventarirconta.numeroprodotto)) 
+		ret = ret.join(Reparti, and_(Reparti.numeroreparto == Prodotti.numeroreparto))
+		ret = ret.join(Gruppireparti, and_(Gruppireparti.numerogrupporeparto == Reparti.numerogrupporeparto))
+		return ret
+ 
+    @expose('ebetl.templates.stock_show_report')
+    def showreport(self, id, ng=None,nr=None):
+        """GET /showreport/id: Show a specific item"""
+        doc = DBSession.query(Inventarit).filter(Inventarit.numeroinventario==id).one()
+        """
+        tables = (
+                Inventarirconta, 
+                Prodotti, 
+                Reparti, 
+                Gruppireparti 
+                )
+        columns = []
+        query_args = []
+        for m in tables:
+            for c in m.__table__.columns:
+                if not c in columns:
+                    columns.append("%s"%(c))
+                    query_args.append(c)
+        """            
+        totale_costo2 = Inventarirconta.costo2 * Inventarirconta.totale_qta                    
+        
+        COSTI = [
+        
+            label('totale_costo', func.sum(totale_costo2)),
+        ] 
+        fltr_query = [Inventarirconta.numeroinventario==id]
+        group = [   Inventarirconta.numeroinventario, 
+					Gruppireparti.numerogrupporeparto,
+					Gruppireparti.grupporeparto]
+        group_tot = [   Inventarirconta.numeroinventario ]
+        if ng:
+			group = group +[
+					Reparti.numeroreparto, 
+					Reparti.reparto
+				]
+			fltr_query = fltr_query + [Gruppireparti.numerogrupporeparto==ng]          
+        if nr:
+			group = group + [
+					Prodotti.numeroprodotto,
+					Prodotti.prodotto
+			]                        
+			fltr_query = fltr_query + [Reparti.numeroreparto==nr]          
+        query_args =  group + COSTI
+        query_args_tot = group_tot + COSTI
+        ret = DBSession.query(*query_args)
+        ret_tot = DBSession.query(*query_args_tot)
+        fltr = [and_(
+                    *fltr_query
+                )
+                ] 
+        ret = ret.filter(*fltr)
+        ret_tot = ret_tot.filter(*fltr)	
+        ret = self._get_joins(ret)    				
+        ret_tot = self._get_joins(ret_tot)
+        ret = ret.group_by(*group)     		
+        ret_tot = ret_tot.group_by(*group_tot)           
+        results = ret.all()        
+        totals = ret_tot.all()
+        return dict(page='stock', id=id, ng=ng, nr=nr, doc=doc, results=results, totals=totals)
+
     def edit(self, id, format='html'):
         """GET /stocks/id/edit: Form to edit an existing item"""
         # url('edit_stock', id=ID)           

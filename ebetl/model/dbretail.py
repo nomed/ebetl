@@ -196,6 +196,13 @@ class Conticontabilita(DeclarativeBase):
     contocontabilita = Column(String(50))
     ordine = Column(Integer) 
 
+
+class Gruppireparti(DeclarativeBase):
+    __tablename__ = 'gruppireparti'
+    sincrofield = Column(Integer, contasincrofield , autoincrement=True)
+    numerogrupporeparto = Column(Integer,Sequence('contagrupporeparto'), autoincrement=True, primary_key=True)
+    grupporeparto = Column(String(40))
+
 class Reparti(DeclarativeBase):
     __tablename__ = 'reparti'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True)
@@ -209,6 +216,10 @@ class Reparti(DeclarativeBase):
     numerocontocontabilitau = Column(Integer, ForeignKey('conticontabilita.numerocontocontabilita'))
     numeroiva = Column(Integer, ForeignKey('iva.numeroiva'))
     iva = relation('Iva', backref=backref('reparti', order_by=codicereparto)) 
+    numerogrupporeparto =  Column(Integer, ForeignKey('gruppireparti.numerogrupporeparto'))
+    grupporeparto = relation('Gruppireparti', backref=backref('reparti'))  
+
+
         
 class Iva(DeclarativeBase):
     __tablename__ = 'iva'
