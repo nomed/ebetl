@@ -79,6 +79,7 @@ setup(
     b2b = ebetl.commands.b2b:B2b    
     starlogic = ebetl.commands.starlogic:Starlogic
     upgcogs = ebetl.commands.update_costs:Updatecosts
+    mailman = ebetl.commands.mailman:Mailman
     #fidelity= ebetl.commands.fidelity:Fidelity    
     #fatmicro = ebetl.commands.fatmicro:Fatmicro
     #ftpacquire = ebetl.commands.ftpacquire:Ftpacquire
