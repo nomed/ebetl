@@ -72,15 +72,16 @@ setup(
     turbogears-devtools = tg.devtools
     [paste.app_install]
     main = pylons.util:PylonsInstaller
-    
+
     [paste.paster_command]
     filconad = ebetl.commands.filconad:Filconad
-    mistral = ebetl.commands.mistral:Mistral   
-    b2b = ebetl.commands.b2b:B2b    
+    mistral = ebetl.commands.mistral:Mistral
+    b2b = ebetl.commands.b2b:B2b
     starlogic = ebetl.commands.starlogic:Starlogic
     upgcogs = ebetl.commands.update_costs:Updatecosts
     mailman = ebetl.commands.mailman:Mailman
-    #fidelity= ebetl.commands.fidelity:Fidelity    
+    zucchetti = ebetl.commands.zucchetti:Zucchetti
+    #fidelity= ebetl.commands.fidelity:Fidelity
     #fatmicro = ebetl.commands.fatmicro:Fatmicro
     #ftpacquire = ebetl.commands.ftpacquire:Ftpacquire
     #zipextract = ebetl.commands.zipextract:Zipextract
@@ -92,11 +93,11 @@ setup(
     #bz00varp = ebetl.commands.bz00varp:Bz00varp
     #cleanupcsv = ebetl.commands.cleanupcsv:Cleanupcsv
     #cleanupean = ebetl.commands.cleanupean:Cleanupean
-    #winvarp = ebetl.commands.winvarp:Winvarp  
-    #upgradefilter = ebetl.commands.upgradefilter:Upgradefilter  
+    #winvarp = ebetl.commands.winvarp:Winvarp
+    #upgradefilter = ebetl.commands.upgradefilter:Upgradefilter
     #getindprezzo = ebetl.commands.getindprezzo:Getindprezzo
-    #seeds = ebetl.commands.seeds:Seeds 
-    #seedsfid = ebetl.commands.seedsfid:Seedsfid 
+    #seeds = ebetl.commands.seeds:Seeds
+    #seedsfid = ebetl.commands.seedsfid:Seedsfid
     #profis = ebetl.commands.profis:Profis
     #sisa = ebetl.commands.sisa:Sisa
 
@@ -105,19 +106,19 @@ setup(
     #acq_listfor = ebetl.commands.acq_mgart00f:AcqMgart00f
     #gilda = ebetl.commands.gilda:Gilda
     #parmalat = ebetl.commands.listini.parmalat:Parmalat
-    #vismara = ebetl.commands.listini.vismara:Vismara 
-    #big = ebetl.commands.listini.big:Big           
+    #vismara = ebetl.commands.listini.vismara:Vismara
+    #big = ebetl.commands.listini.big:Big
     #updateconti = ebetl.commands.updateconti:Updateconti
     acqmonciotti = ebetl.commands.acqmonciotti:Acqmonciotti
-    #cei = ebetl.commands.cei:Cei      
-    #syncdb = ebetl.commands.syncdb:Syncdb  
-    #exportclifor = ebetl.commands.exportclifor:Exportclifor   
+    #cei = ebetl.commands.cei:Cei
+    #syncdb = ebetl.commands.syncdb:Syncdb
+    #exportclifor = ebetl.commands.exportclifor:Exportclifor
     #cleanupcar = ebetl.commands.cleanupcar:Cleanupcar
     #getgrammatura = ebetl.commands.getgrammatura:Getgrammatura
     #mycommand = ebetl.commands.mycommand:Mycommand
     #bigupdate = ebetl.commands.listini.bigupdate:Bigupdate
     #clientifid = ebetl.commands.clientifid:Clientifid
-    #testcmd = ebetl.commands.testcmd:Testcmd  
+    #testcmd = ebetl.commands.testcmd:Testcmd
     """,
     dependency_links=[
         "http://tg.gy/220"
