@@ -56,6 +56,9 @@ class Mapper(object):
     def get_aammdd(self, value)  :
         d = datetime.strptime(value, "%y%m%d").date()
         return  datetime.combine(d, time())
+    def get_aaaamm(self, value)  :
+        d = datetime.strptime(value, "%Y%m").date()
+        return  datetime.combine(d, time())
     def get_vat(self, value)  :
         try:
             return  int(value)

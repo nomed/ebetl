@@ -1,6 +1,66 @@
 {
-    "": [
-        "", 
-        "get_int"
+    "expense_account_code": [
+        "h_codice_conto_dare", 
+        "get_strip"
+    ], 
+    "code01_label": [
+        "h_descrizione_causale", 
+        "get_strip"
+    ], 
+    "code02": [
+        "h_codice_causale", 
+        "get_strip"
+    ], 
+    "code05": [
+        "h_codifica_ripartizione", 
+        "get_strip"
+    ], 
+    "fiscal_code": [
+        "h_codice_fiscale_ditta", 
+        "get_strip"
+    ], 
+    "notes": [
+        "h_annotazioni", 
+        "get_strip"
+    ], 
+    "cost_center_id": [
+        "h_codifica_ripartizione", 
+        "get_cost_center"
+    ], 
+    "code02_label": [
+        "h_descrizione_codice_causale", 
+        "get_strip"
+    ], 
+    "doc_date": [
+        "h_data", 
+        "get_aaaamm"
+    ], 
+    "employee_code": [
+        "h_codice_soggetto_dipendente", 
+        "get_strip"
+    ], 
+    "code01": [
+        "h_codice_tipo_causale", 
+        "get_strip"
+    ], 
+    "code03": [
+        "h_codice_soggetto_ditta", 
+        "get_strip"
+    ], 
+    "total": [
+        "h_importo", 
+        "get_x100"
+    ], 
+    "revenue_account_code": [
+        "h_codice_conto_avere", 
+        "get_strip"
+    ], 
+    "code04": [
+        "h_ripartizione_conto", 
+        "get_strip"
+    ], 
+    "code06": [
+        "h_filler_codice_fiscale", 
+        "get_strip"
     ]
 }

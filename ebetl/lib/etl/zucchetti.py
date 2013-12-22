@@ -128,13 +128,43 @@ class ZucchettiObj(object):
             content = open(fpath).read()
             content = content.splitlines()
             results = self.get_data(content)
-            columns = self.json['header'][0]
-            print ";".join(columns)
-            for i in results:
-                row = []
-                for c in columns:
-                    row.append(i.get(c))
-                print ";".join(row)
+            #columns = self.json['header'][0]
+            #print ";".join(columns)
+            #for r in results:
+                #row = []
+                #for c in columns:
+                #    row.append(i.get(c))
+                #print ";".join(row)
+
+            row = 1
+            for res in results:
+                factlaborcost_dict = {}
+
+
+                for key, val in self.jsonmap.iteritems():
+                    src, func = val
+                    if res.has_key(src):
+                        newval = getattr(mapper, func)(res[src])
+                        factlaborcost_dict[key] = newval
+                        log.debug("fact_b2b: %s | %s | %s | %s => %s"%(
+                                    src, func, key, res[src], [unicode(newval).encode('utf-8')]
+                        ))
+                    else:
+                        #log.debug("%s"%(pprint(pricelist)))
+                        log.debug("not found: %s [%s]"%(src, key))
+
+                fobjrow = Factlaborcost()
+
+                #setattr(fobjrow, "account_code", self.config.get("%s.notfound"%(self.record)) )
+
+                for key, val in factlaborcost_dict.iteritems():
+                    if key in self.rosetta.keys():
+                        val = self.rosetta[key][val]
+
+                    setattr(fobjrow, key, val)
+                DBSession.add(fobjrow)
+
+
             """
             try:
                 fobj = DBSession.query(Inputb2b).filter(

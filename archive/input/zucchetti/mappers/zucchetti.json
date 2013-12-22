@@ -30,7 +30,7 @@
             "h_codice_dato_ripartizione", 
             "h_codifica_ripartizione", 
             "h_blank", 
-            "h_filler"
+            "h_filler_codice_fiscale"
         ], 
         [
             "1", 
