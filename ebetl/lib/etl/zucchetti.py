@@ -8,16 +8,16 @@ import glob, json
 import logging, os, re, sys
 logging.basicConfig(
     level=logging.DEBUG)
-log = logging.getLogger('filconad')
+log = logging.getLogger('zucchetti')
 
 from ebetl.lib.etl import get_txn
 from ebetl.model import *
-from ebetl.model.dbretail import Inputb2b
-from ebetl.model.zerobi import Factb2b
+#from ebetl.model.dbretail import Inputb2b
+#from ebetl.model.zerobi import Factb2b
 import transaction
 
 from sqlalchemy import and_
-from ebetl.lib.views import get_pricelist, get_pricelist_todict
+#from ebetl.lib.views import get_pricelist, get_pricelist_todict
 from ebetl.lib.etl import Mapper
 from ebetl.lib import strip_non_ascii
 
@@ -28,14 +28,14 @@ from pprint import pprint
 
 mapper = Mapper()
 
-class FilconadObj(object):
+class ZucchettiObj(object):
     """
-    filconad_big.path_input = %(here)s/archive/input/filconad/big
-    filconad_big.filename = *.txt
-    filconad_big.filename_out = filconad.csv
-    filconad_big.path_output = %(here)s/archive/output/filconad/big
-    filconad_big.codice = 000720
-    filconad_big.notfound = 1601000000
+    zucchetti.path_input = %(here)s/archive/input/filconad/big
+    zucchetti.filename = *.txt
+    zucchetti.filename_out = filconad.csv
+    zucchetti.path_output = %(here)s/archive/output/filconad/big
+    zucchetti.codice = 000720
+    zucchetti.notfound = 1601000000
     """
 
     def __init__(self, config,record, *args, **kw):
@@ -86,7 +86,7 @@ class FilconadObj(object):
 
         return dir_all
 
-    def get_data(self,pricelist, b2b_id, lines, *args, **kw):
+    def get_data(self,lines, *args, **kw):
         """
 
 
@@ -95,26 +95,9 @@ class FilconadObj(object):
         for r in lines:
             r=strip_non_ascii(r)
             if not r.startswith(' '):
-
-                if r[0:2] == '01':
-                    keys, body = self.json['header']
-                    h_txn = get_txn(keys, body, r)
-                    h_txn['inputb2b_id'] = b2b_id
-                elif r[0:2] == '02':
-                    "join header and body"
-                    keys, body = self.json['body']
-                    txn = get_txn(keys, body, r)
-                    txn.update(h_txn)
-                    b_ref_code = txn.get('b_ref_code')
-                    # TODO : support not 6 len char sup code
-                    # if b_ref_code is 1 and not 000001
-                    # account_code can't be found !!!!!
-                    b_ref_code = b_ref_code.strip().zfill(6)
-
-                    if  b_ref_code in pricelist.keys():
-                        txn.update(pricelist[b_ref_code])
-                    ret.append(txn)
-
+                keys, body = self.json['header']
+                txn = get_txn(keys, body, r)
+                ret.append(txn)
         return ret
 
     def get_hash(self, fpath ):
@@ -130,15 +113,59 @@ class FilconadObj(object):
         return my_hash
 
     def store_files(self, *args, **kw):
+        pass
+
         files = self._get_files()
-        prov = DBSession.query(Provenienze).filter(
-                Provenienze.codiceprovenienza==self.prov,
-                Provenienze.tipoprovenienza=="FOR").one()
+
 
         for fpath in files:
             log.debug(fpath)
             fname = os.path.basename(fpath)
             fname = self.get_hash(fpath)
+            #print fname
+            #print fpath
+            #print self.json
+            content = open(fpath).read()
+            content = content.splitlines()
+            results = self.get_data(content)
+            #columns = self.json['header'][0]
+            #print ";".join(columns)
+            #for r in results:
+                #row = []
+                #for c in columns:
+                #    row.append(i.get(c))
+                #print ";".join(row)
+
+            row = 1
+            for res in results:
+                factlaborcost_dict = {}
+
+
+                for key, val in self.jsonmap.iteritems():
+                    src, func = val
+                    if res.has_key(src):
+                        newval = getattr(mapper, func)(res[src])
+                        factlaborcost_dict[key] = newval
+                        log.debug("fact_b2b: %s | %s | %s | %s => %s"%(
+                                    src, func, key, res[src], [unicode(newval).encode('utf-8')]
+                        ))
+                    else:
+                        #log.debug("%s"%(pprint(pricelist)))
+                        log.debug("not found: %s [%s]"%(src, key))
+
+                fobjrow = Factlaborcost()
+
+                #setattr(fobjrow, "account_code", self.config.get("%s.notfound"%(self.record)) )
+
+                for key, val in factlaborcost_dict.iteritems():
+                    if key in self.rosetta.keys():
+                        val = self.rosetta[key][val]
+
+                    setattr(fobjrow, key, val)
+                DBSession.add(fobjrow)
+
+
+            """
             try:
                 fobj = DBSession.query(Inputb2b).filter(
                     and_(Inputb2b.filename==fname,
@@ -159,12 +186,14 @@ class FilconadObj(object):
             log.debug("path_output: " + self.path_output)
             log.debug("bkpath: " + bkpath)
             os.rename(fpath, bkpath)
-
+            """
         transaction.commit()
 
     def write_out(self, inputb2b_id=None, *args, **kw):
         """
         Process files from db and process docs and recs
+        """
+        pass
         """
         # get prov obj
         prov = DBSession.query(Provenienze).filter(
@@ -277,7 +306,7 @@ class FilconadObj(object):
         #        print >> file_obj, ';'.join(row)
         #
         #file_obj.close()
-
+        """
 
 
 
