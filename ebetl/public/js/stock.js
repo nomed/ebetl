@@ -10,11 +10,11 @@ $('#qty a#qta').editable({
     success: function(response, newValue) {
         data = $.parseJSON(response);
         strid = 'cost'+data.pk 
-        document.getElementById(strid).innerHTML = data.costo
+        //document.getElementById(strid).innerHTML = data.costo
         strid = 'totale_qta'+data.pk 
         document.getElementById(strid).innerHTML = data.totale_qta   
-        strid = 'totale_costo'+data.pk 
-        document.getElementById(strid).innerHTML = "<b>"+data.totale_costo+"</b>"              
+        //strid = 'totale_costo'+data.pk 
+        //document.getElementById(strid).innerHTML = "<b>"+data.totale_costo+"</b>"              
         console.log(data)        
         }  
 });

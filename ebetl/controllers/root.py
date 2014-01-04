@@ -95,7 +95,7 @@ class StockController(BaseController):
     @expose('ebetl.templates.stock')
     def index(self):
         """Handle the front-page."""
-        results = DBSession.query(Inventarit).limit(10).all()
+        results = DBSession.query(Inventarit).all()
         return dict(page='stock', results=results) 
 
     def create(self):
