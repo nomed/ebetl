@@ -131,9 +131,15 @@ class FilconadObj(object):
 
     def store_files(self, *args, **kw):
         files = self._get_files()
-        prov = DBSession.query(Provenienze).filter(
+        try:
+            prov = DBSession.query(Provenienze).filter(
                 Provenienze.codiceprovenienza==self.prov,
                 Provenienze.tipoprovenienza=="FOR").one()
+        except:
+            prov = Provenienze()
+            prov.codiceprovenienza = self.prov
+            prov.tipoprovenienza="FOR"
+            DBSession.add(prov)
 
         for fpath in files:
             log.debug(fpath)
@@ -254,8 +260,8 @@ class FilconadObj(object):
                 for key, val in factb2b_dict.iteritems():
                     if key in self.rosetta.keys():
                         val = self.rosetta[key][val]
-
                     setattr(fobjrow, key, val)
+
                 DBSession.add(fobjrow)
 
                 #print fobjrow,fobjrow.doc_num

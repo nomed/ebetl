@@ -61,9 +61,11 @@ setup(
                                  'templates/*/*',
                                  'public/*/*']},
     message_extractors={'ebetl': [
+            ('commands/**', 'ignore', None),
             ('**.py', 'python', None),
             ('templates/**.html', 'genshi', None),
-            ('public/**', 'ignore', None)]},
+            ('public/**', 'ignore', None)
+		]},
 
     entry_points="""
     [paste.app_factory]
@@ -81,6 +83,7 @@ setup(
     upgcogs = ebetl.commands.update_costs:Updatecosts
     mailman = ebetl.commands.mailman:Mailman
     zucchetti = ebetl.commands.zucchetti:Zucchetti
+    pl-big = ebetl.commands.listini.big:Big
     #fidelity= ebetl.commands.fidelity:Fidelity
     #fatmicro = ebetl.commands.fatmicro:Fatmicro
     #ftpacquire = ebetl.commands.ftpacquire:Ftpacquire
@@ -107,7 +110,6 @@ setup(
     #gilda = ebetl.commands.gilda:Gilda
     #parmalat = ebetl.commands.listini.parmalat:Parmalat
     #vismara = ebetl.commands.listini.vismara:Vismara
-    #big = ebetl.commands.listini.big:Big
     #updateconti = ebetl.commands.updateconti:Updateconti
     acqmonciotti = ebetl.commands.acqmonciotti:Acqmonciotti
     #cei = ebetl.commands.cei:Cei

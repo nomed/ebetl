@@ -8,7 +8,7 @@ from datetime import datetime
 from hashlib import sha256
 #__all__ = ['User', 'Group', 'Permission']
 
-from sqlalchemy import Table, ForeignKey, Column, Sequence, and_, or_
+from sqlalchemy import Table, ForeignKey, Column, Sequence, UniqueConstraint, and_, or_
 from sqlalchemy.types import Unicode, Integer, BigInteger, DateTime, Float, String, Date, BLOB
 from sqlalchemy.orm import relation, synonym, backref
 from sqlalchemy.sql import label
@@ -35,22 +35,26 @@ contamovimento = Sequence('contamovimento')
 contarigamovimento = Sequence('contarigamovimento')
 count_b2b = Sequence('count_b2b')
 contaalias = Sequence('contaalias')
-
+contacliente = Sequence('contacliente')
+contamagazzino = Sequence('contamagazzino')
 
 class Magazzini(DeclarativeBase):
     __tablename__ = 'magazzini'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
-    numeromagazzino = Column(Integer, autoincrement=True, primary_key=True)
+    numeromagazzino = Column(Integer, contamagazzino, primary_key=True)
     codicemagazzino = Column(String(16), unique=True, nullable=False)
     magazzino = Column(String(255))
 
 class Provenienze(DeclarativeBase):
+    """
+
+    """
     __tablename__ = 'provenienze'
-    sincrofield = Column(Integer, contasincrofield , autoincrement=True)    
+    sincrofield = Column(Integer, contasincrofield , autoincrement=True)
     tipoprovenienza = Column(String(3))#FOR,CLI
-    numeroprovenienza= Column(Integer, contaprovenienza, 
-                            autoincrement=True, primary_key=True)    
-    codiceprovenienza = Column(String(20), unique=True, nullable=False)  
+    numeroprovenienza= Column(Integer, contaprovenienza,
+                            autoincrement=True, primary_key=True)
+    codiceprovenienza = Column(String(20), unique=True, nullable=False)
     provenienza =  Column(String(100))
     partitaiva = Column(String(16))
     codicefiscale = Column(String(16))
@@ -65,12 +69,17 @@ class Provenienze(DeclarativeBase):
     email=Column(String(30))
     prodottiprovenienza = Column(Integer)
 
+    __table_args__ = (
+        UniqueConstraint(tipoprovenienza, numeroprovenienza),
+    )
+
+
 class Listini(DeclarativeBase):
     __tablename__ = 'listini'
-    sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)    
+    sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
     numerolistino = Column(Integer,autoincrement=True, primary_key=True)
     codice=Column(String(4))
-    
+
 class Listiniprodotti(DeclarativeBase):
     __tablename__ = 'listiniprodotti'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
@@ -79,7 +88,7 @@ class Listiniprodotti(DeclarativeBase):
     listino = relation('Listini', backref='prezzi')
     prezzo = Column(Float)
     numeroprodotto = Column(Integer, ForeignKey('prodotti.numeroprodotto'))
-    prodotto = relation('Prodotti', backref='listini')     
+    prodotto = relation('Prodotti', backref='listini')
 
 class Listiniprovenienze(DeclarativeBase):
     __tablename__ = 'listiniprovenienze'
@@ -87,14 +96,14 @@ class Listiniprovenienze(DeclarativeBase):
     numerolistinoprovenienza = Column(Integer,primary_key=True)
     numeroprodottoprovenienza = Column(Integer, ForeignKey(
                         'prodottiprovenienze.numeroprodottoprovenienza'))
-    prodottoprovenienza = relation('Prodottiprovenienze', backref='listini')  
+    prodottoprovenienza = relation('Prodottiprovenienze', backref='listini')
     numeroeanprodotto = Column(Integer, ForeignKey(
                         'eanprodotti.numeroeanprodotto'))
-    eanprodotto = relation('Eanprodotti', backref='listiniean')      
+    eanprodotto = relation('Eanprodotti', backref='listiniean')
     numeroprovenienza = Column(Integer, ForeignKey(
                         'provenienze.numeroprovenienza'))
-    proveninenza = relation('Provenienze', backref='listini')
-    validodal = Column(DateTime)      
+    provenienza = relation('Provenienze', backref='listini')
+    validodal = Column(DateTime)
     validoal = Column(DateTime)
     prezzonetto = Column(Float)
     stvariazionenetto = Column(String(50))
@@ -102,19 +111,19 @@ class Listiniprovenienze(DeclarativeBase):
     @property
     def disc(self):
         """"""
-        
-        return get_price_discount(self.prezzonetto,self.stvariazionenetto)     
+
+        return get_price_discount(self.prezzonetto,self.stvariazionenetto)
 
 class Sottoscorta(DeclarativeBase):
     __tablename__ = 'sottoscorta'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
     numeroazienda = Column(Integer)
-    numeromagazzino = Column(Integer,ForeignKey('magazzini.numeromagazzino'))    
+    numeromagazzino = Column(Integer,ForeignKey('magazzini.numeromagazzino'))
     numeroprodotto = Column(Integer, ForeignKey('prodotti.numeroprodotto'))
     numeroeanprodotto = Column(Integer, ForeignKey('eanprodotti.numeroeanprodotto'))
     qtascorta = Column(Float)
-    qtariordino = Column(Float)  
-   
+    qtariordino = Column(Float)
+
 class Prodotti(DeclarativeBase):
     __tablename__ = 'prodotti'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True)
@@ -123,21 +132,21 @@ class Prodotti(DeclarativeBase):
     prodottobreve = Column(String(20))
     prodotto = Column(String(40))
     numerotipologiaprodotto = Column(Integer)
-    numeroproduttore = Column(Integer)    
+    numeroproduttore = Column(Integer)
     datainserimento = Column(DateTime)
     varprezzocon = Column(Integer)
     numeroreparto = Column(Integer,ForeignKey('reparti.numeroreparto'))
-    reparto = relation('Reparti', backref=backref('prodotti', order_by=codiceprodotto))          
+    reparto = relation('Reparti', backref=backref('prodotti', order_by=codiceprodotto))
     numeroiva = Column(Integer, ForeignKey('iva.numeroiva'))
-    iva = relation('Iva', backref=backref('prodotti', order_by=codiceprodotto))  
+    iva = relation('Iva', backref=backref('prodotti', order_by=codiceprodotto))
     numerounitamisura = Column(Integer, ForeignKey('unitamisure.numerounitamisura'))
-    unitamisura = relation('Unitamisure', backref='prodotti')         
+    unitamisura = relation('Unitamisure', backref='prodotti')
     costonetto = Column(Float)
     dataultimocosto = Column(DateTime)
     pezzixcollo=Column(Float)
     qtacontenuto = Column(Float)
     numeroumvisualizzazione = Column(Integer)
-    
+
     numerocontocontabilitai = Column(Integer, ForeignKey('conticontabilita.numerocontocontabilita'))
     numerocontocontabilitau = Column(Integer, ForeignKey('conticontabilita.numerocontocontabilita'))
 
@@ -145,14 +154,14 @@ class Prodotti(DeclarativeBase):
     def udm_view(self):
         return DBSession.query(Unitamisure).filter_by(
                           numerounitamisura=str(self.numeroumvisualizzazione)).one()
-    
+
     @property
     def listini(self):
         return DBSession.query(Listiniprodotti).filter_by(
                           numeroprodotto=str(self.numeroprodotto)).all()
-        
- 
-    
+
+
+
     @property
     def prezzo(self):
         try:
@@ -163,26 +172,26 @@ class Prodotti(DeclarativeBase):
             return l.prezzo
         except:
             return 0
-                
+
     @property
     def valoreiva(self):
         if self.iva:
             return self.iva.valoreiva
         else:
             return self.reparto.iva.valoreiva
-  
+
     @classmethod
     def margin(cls, price, cost):
         """"""
-        
+
         return get_margin(price,cost)
 
     @classmethod
     def disc(cls, price, disc):
         """"""
-        
-        return get_price_discount(price,disc)        
-              
+
+        return get_price_discount(price,disc)
+
 class Conticontabilita(DeclarativeBase):
     __tablename__ = 'conticontabilita'
     #logicdelete
@@ -190,11 +199,11 @@ class Conticontabilita(DeclarativeBase):
     #sincroserverfield
     #instablog
     #updtablog
-    #numerogruppcontocontabilita = Column(Integer)    
-    numerocontocontabilita = Column(Integer, autoincrement=True, primary_key=True) 
+    #numerogruppcontocontabilita = Column(Integer)
+    numerocontocontabilita = Column(Integer, autoincrement=True, primary_key=True)
     codicecontocontabilita = Column(String(20))
     contocontabilita = Column(String(50))
-    ordine = Column(Integer) 
+    ordine = Column(Integer)
 
 
 class Gruppireparti(DeclarativeBase):
@@ -215,12 +224,12 @@ class Reparti(DeclarativeBase):
                             ==Conticontabilita.numerocontocontabilita ")
     numerocontocontabilitau = Column(Integer, ForeignKey('conticontabilita.numerocontocontabilita'))
     numeroiva = Column(Integer, ForeignKey('iva.numeroiva'))
-    iva = relation('Iva', backref=backref('reparti', order_by=codicereparto)) 
+    iva = relation('Iva', backref=backref('reparti', order_by=codicereparto))
     numerogrupporeparto =  Column(Integer, ForeignKey('gruppireparti.numerogrupporeparto'))
-    grupporeparto = relation('Gruppireparti', backref=backref('reparti'))  
+    grupporeparto = relation('Gruppireparti', backref=backref('reparti'))
 
 
-        
+
 class Iva(DeclarativeBase):
     __tablename__ = 'iva'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
@@ -229,7 +238,7 @@ class Iva(DeclarativeBase):
     descrizioneiva = Column(String(100))
     valoreiva = Column(Float)
     numeroivaecr = Column(Integer)
-    
+
     @property
     def mult(self):
         return float(1) + float(self.valoreiva)/float(100)
@@ -248,7 +257,7 @@ class Unitamisure(DeclarativeBase):
     numerogruppounitamisure = Column(Integer)
     moltiplicatoreunita = Column(Integer)
     #numerogruppounitamisura = Column(Integer)
-    #gruppounitamisura = relation('Gruppounitamisure', backref='udms')   
+    #gruppounitamisura = relation('Gruppounitamisure', backref='udms')
 
 
     @property
@@ -260,43 +269,53 @@ class Eanprodotti(DeclarativeBase):
     numeroeanprodotto = Column(Integer,Sequence('contaeanprodotto'), autoincrement=True, primary_key=True)
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
     ean = Column(String(13), unique=True, nullable=False)
-    codicetasto=Column(Integer)    
+    codicetasto=Column(Integer)
     codicebilancia=Column(Integer)
     numerogruppobilancia=Column(Integer)
-    #varprezzocon = Column(Integer) 
+    #varprezzocon = Column(Integer)
     numeroprodotto = Column(Integer, ForeignKey('prodotti.numeroprodotto'))
-    prodotto = relation('Prodotti', backref='eans')   
-    eancorpopeso =   Column(String(1))   
-    giorniscadenzabilancia = Column(Integer) 
+    prodotto = relation('Prodotti', backref='eans')
+    eancorpopeso =   Column(String(1))
+    giorniscadenzabilancia = Column(Integer)
     prodottoean=Column(String(300))
     prezzovariabilebilancia=Column(Integer)
     qtaxconf = Column(Integer)
-    
+
+class Eanvariati(DeclarativeBase):
+    __tablename__ = 'eanvariati'
+    sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
+    ideanprodotto = Column(Integer, ForeignKey('eanprodotti.numeroeanprodotto'))
+    ean = relation(Eanprodotti, backref='eanvariati')
+    idprodotto = Column(Integer, ForeignKey('prodotti.numeroprodotto'))
+    prodotto = relation(Prodotti, backref='eanvariati')
+
+
 class Prodottiprovenienze(DeclarativeBase):
     __tablename__ = 'prodottiprovenienze'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
     numeroprodottoprovenienza = Column(Integer, contaprodottoprovenienza, autoincrement=True, primary_key=True)
     tipoprovenienza = Column(String(3))
-    numeroprovenienza = Column(Integer, ForeignKey('provenienze.numeroprovenienza')) 
- 
+    numeroprovenienza = Column(Integer, ForeignKey('provenienze.numeroprovenienza'))
+
     numeroprodotto = Column(Integer, ForeignKey('prodotti.numeroprodotto'))
-    prodotto = relation('Prodotti')     
+    prodotto = relation('Prodotti')
     numeroeanprodotto = Column(Integer, ForeignKey('eanprodotti.numeroeanprodotto'))
-    ean = relation('Eanprodotti', backref=backref('prodottiprovenienze'))         
+    ean = relation('Eanprodotti', backref=backref('prodottiprovenienze'))
     codiceprodottoprovenienza =  Column(String(30))
-    prodottoprovenienza =  Column(String(100))  
+    prodottoprovenienza =  Column(String(100))
     ordine = Column(Integer)
-    provenienza = relation('Provenienze', backref=backref('referenze', 
-                                          order_by=codiceprodottoprovenienza))        
-        
+    provenienza = relation('Provenienze', backref=backref('referenze',
+                                          order_by=codiceprodottoprovenienza))
+
 class Movimentit(DeclarativeBase):
     __tablename__='movimentit'
     #logicdelete
+    numeromovimento = Column(Integer, contamovimento, autoincrement=True, primary_key=True)
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
     sincroserverfield = Column(Integer)
     #instablog
     #updtablog
-    numeromovimento = Column(Integer, contamovimento, autoincrement=True, primary_key=True)
+
     tipodocumento = Column(String(3))
     numeroazienda = Column(Integer)
     numerosedeazienda = Column(Integer)
@@ -322,18 +341,18 @@ class Movimentit(DeclarativeBase):
     #numeromodellostampa
     #variante
     tipoprovenienza = Column(String(3))
-    numeroprovenienza = Column(Integer, ForeignKey('provenienze.numeroprovenienza')) 
-    provenienza= relation('Provenienze')       
+    numeroprovenienza = Column(Integer, ForeignKey('provenienze.numeroprovenienza'))
+    provenienza= relation('Provenienze')
     numerosedeprovenienza = Column(Integer)
     #intestazione
     ragionesociale=Column('provenienza', String(250))
     codicefiscale = Column(String(16))
-    partitaiva = Column(String(16))    
+    partitaiva = Column(String(16))
     #
-    indirizzo = Column(String(100))  
-    cap = Column(String(5))  
-    citta = Column(String(50))  
-    prov = Column(String(2))  
+    indirizzo = Column(String(100))
+    cap = Column(String(5))
+    citta = Column(String(50))
+    prov = Column(String(2))
     #telefono
     #fax
     #destinazione
@@ -374,7 +393,7 @@ class Movimentit(DeclarativeBase):
     #contocorrente
     #note
     controllonote=Column(Integer)
-    #documentoannullato = 
+    #documentoannullato =
     #pk
     #numeronazione
     #prefissopartitaiva
@@ -399,7 +418,7 @@ class Movimentir(DeclarativeBase):
     instablog = Column(Integer)
     #updtablog
     numeromovimento = Column(Integer, ForeignKey('movimentit.numeromovimento'))
-    movimento = relation('Movimentit',  backref='movimentir')     
+    movimento = relation('Movimentit',  backref='movimentir')
     numerorigamovimento = Column(Integer, contarigamovimento, autoincrement=True, primary_key=True)
     datamovimento = Column(DateTime)
     dataregistrazione = Column(DateTime)
@@ -408,36 +427,36 @@ class Movimentir(DeclarativeBase):
     modalitainserimento = Column(String(1))
     tiporiga = Column(String(1))
     codice = Column(String(30))
-    descrizione = Column(String(500))    
-    tipoprodotto = Column(String(3)) 
+    descrizione = Column(String(500))
+    tipoprodotto = Column(String(3))
     # == prodotto
     idprodotto = Column(Integer, ForeignKey('prodotti.numeroprodotto') )
-    prodotto = relation('Prodotti') 
-    
+    prodotto = relation('Prodotti')
+
     # == eanprodotto
     numeroeanprodotto = Column(Integer, ForeignKey('eanprodotti.numeroeanprodotto')  )
     eanprodotto=relation('Eanprodotti')
-    
+
     ean = Column(String(13))
-    
-    idalias = Column(Integer ) 
+
+    idalias = Column(Integer )
     alias = Column(String(30))
-    numerounitamisura = Column(Integer ) 
+    numerounitamisura = Column(Integer )
     codiceunitamisura = Column(String(10))
-    cifresignificative = Column(Integer ) 
+    cifresignificative = Column(Integer )
     lotto = Column(String(50))
     pesokg = Column(Float)
     pezzixcollo = Column(Float)
-    
+
     # == reparti
     numeroreparto = Column(Integer, ForeignKey('reparti.numeroreparto')  )
     reparto = relation('Reparti')
-    
+
     numeroproduttore = Column(Integer)
     numeroprodottoproduttore = Column(Integer)
     numerolistino = Column(Integer)
     numeroiva = Column(Integer, ForeignKey('iva.numeroiva'))
-    iva = relation('Iva', backref='movimenti') 
+    iva = relation('Iva', backref='movimenti')
     tipoprovenienzaordine = Column(String(3))
     #numeroordine = Column(Integer)
     #numerorigaordine = Column(Integer)
@@ -447,21 +466,21 @@ class Movimentir(DeclarativeBase):
     #numerorigamovimentoorigine
     #numerofogliolavoro
     #numerorigafogliolavoro
-    
+
     # == magazzini
-    numeromagazzino = Column(Integer,ForeignKey('magazzini.numeromagazzino'),     
+    numeromagazzino = Column(Integer,ForeignKey('magazzini.numeromagazzino'),
                                     nullable=True)
     magazzino = relation('Magazzini')
     #tipoprovenienzalavorazione
     #numeroprovenienzalavorazione
     #datalavorazione
-    
+
     # == contocontabilita
-    numerocontocontabilita = Column(Integer,ForeignKey('conticontabilita.numerocontocontabilita'), 
-                                    nullable=True)        
-    conto = relation('Conticontabilita')        
-    
-    
+    numerocontocontabilita = Column(Integer,ForeignKey('conticontabilita.numerocontocontabilita'),
+                                    nullable=True)
+    conto = relation('Conticontabilita')
+
+
     codiceqta = Column(String(15))
     qtamovimento = Column(Float)
     qtascarico = Column(Float)
@@ -477,7 +496,7 @@ class Movimentir(DeclarativeBase):
     ivaprezzolistino = Column(Float)
     prezzolistino = Column(Float)
     prezzonetto = Column(Float)
-    ivaprezzo = Column(Float) 
+    ivaprezzo = Column(Float)
     prezzo = Column(Float)
     stvariazionenetto = Column(String(50))
     variazionepercnetto = Column(Float)
@@ -523,17 +542,17 @@ class Ricevutet(DeclarativeBase):
     camerieri = Column(String(150))
     qtaunicariga = Column(Float)
     descrizioneunicariga = Column(String(150))
-       
+
 class Movimentiiva(DeclarativeBase):
     __tablename__ = 'movimentiiva'
-    sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)    
-    numeromovimento = Column(Integer,ForeignKey('movimentit.numeromovimento')) 
+    sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
+    numeromovimento = Column(Integer,ForeignKey('movimentit.numeromovimento'))
     movimentot=relation('Movimentit', backref='movimentiiva')
     numeroiva = Column(Integer, ForeignKey('iva.numeroiva'))
-    iva = relation('Iva', backref='movimentiiva')     
-    totaleimponibile = Column(Float)        
+    iva = relation('Iva', backref='movimentiiva')
+    totaleimponibile = Column(Float)
     totaleiva=Column(Float)
-    
+
 class Pagamenti(DeclarativeBase):
     __tablename__ = 'pagamenti'
     #logicdelete
@@ -542,25 +561,25 @@ class Pagamenti(DeclarativeBase):
     #instablog
     #updtablog
     numeropagamento = Column(Integer, autoincrement=True, primary_key=True)
-    numeromovimento = Column(Integer,ForeignKey('movimentit.numeromovimento'))        
-    movimentot = relation('Movimentit', backref='pagamenti')    
+    numeromovimento = Column(Integer,ForeignKey('movimentit.numeromovimento'))
+    movimentot = relation('Movimentit', backref='pagamenti')
     numeroformapagamento = Column(Integer)
     importo = Column(Float)
-    #pk  
-    
+    #pk
+
 class Movimentifid(DeclarativeBase):
     __tablename__ = 'movimentifid'
     #logicdelete
     sincrofield = Column(Integer, contasincrofield , autoincrement=True)
     #sincroserverfield
     #instablog
-    #updtablog   
-    numeromovimentofid = Column(Integer, contamovimentofid, autoincrement=True, primary_key=True) 
+    #updtablog
+    numeromovimentofid = Column(Integer, contamovimentofid, autoincrement=True, primary_key=True)
     elaborato = Column(Integer, default = 1)
     numeroazienda = Column(Integer)
     numerocampagnapremi = Column(Integer)
     numeroclientefid = Column(Integer, ForeignKey('clientifid.numeroclientefid'))
-    clientefid = relation('Clientifid', backref='movimentifid') 
+    clientefid = relation('Clientifid', backref='movimentifid')
     codiceclientefid = Column(String(20))
     tipomovimentofid = Column(String(20))
     tipopunti = Column(String(1))
@@ -580,8 +599,8 @@ class Clientifid(DeclarativeBase):
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
     #sincroserverfield
     #instablog
-    #updtablog   
-    numeroclientefid = Column(Integer, contaclientefid, autoincrement=True, primary_key=True) 
+    #updtablog
+    numeroclientefid = Column(Integer, contaclientefid, autoincrement=True, primary_key=True)
     numeroazienda = Column(Integer, default=1)
     numerogruppoclientefid = Column(Integer, default=1)
     codiceclientefid = Column(String(20), unique=True)
@@ -605,7 +624,7 @@ class Clientifid(DeclarativeBase):
     blacklist = Column(Integer)
     assegnato = Column(Integer, default=1)
     nucleofamiliare = Column(Integer)
-    
+
     @property
     def punti(self):
         ret = 0
@@ -614,20 +633,21 @@ class Clientifid(DeclarativeBase):
             ret = ret + m.punti
         return ret
 
+
 class Inventarit(DeclarativeBase):
     __tablename__='inventarit'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
     sincroserverfield = Column(Integer)
     numeroinventario = Column(Integer, containventario, autoincrement=True, primary_key=True)
-    numeroazienda = Column(Integer, ForeignKey('provenienze.numeroprovenienza'))  
+    numeroazienda = Column(Integer, ForeignKey('provenienze.numeroprovenienza'))
     azienda = relation('Provenienze')
     datainventario = Column(DateTime)
     numerodocumento = Column(Integer)
     anno = Column(Integer)
-    numeromagazzino = Column(Integer,ForeignKey('magazzini.numeromagazzino'),     
+    numeromagazzino = Column(Integer,ForeignKey('magazzini.numeromagazzino'),
                                     nullable=True)
-    magazzino = relation('Magazzini') 
-    descrizione = Column(String(255))   
+    magazzino = relation('Magazzini')
+    descrizione = Column(String(255))
 
     @classmethod
     def qta(cls, doc_id, prod_id):
@@ -635,8 +655,8 @@ class Inventarit(DeclarativeBase):
         try:
             ret = DBSession.query(Inventarirconta).filter(
                 Inventarirconta.numeroinventario==doc_id,
-                Inventarirconta.numeroprodotto==prod_id,                
-                ).one()  
+                Inventarirconta.numeroprodotto==prod_id,
+                ).one()
         except:
             ret = Inventarirconta()
             ret.numeroinventario=doc_id
@@ -668,26 +688,26 @@ for p in ps:
     __tablename__='inventarir'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
     sincroserverfield = Column(Integer)
-    numeroinventario = Column(Integer, ForeignKey('inventarit.numeroinventario')) 
+    numeroinventario = Column(Integer, ForeignKey('inventarit.numeroinventario'))
     inventario = relation('Inventarit', backref='inventarir')
-    numerorigainventario = Column(Integer, contarigainventario, autoincrement=True, primary_key=True)    
-    
-    numeroprodotto = Column(Integer, ForeignKey('prodotti.numeroprodotto'))    
+    numerorigainventario = Column(Integer, contarigainventario, autoincrement=True, primary_key=True)
+
+    numeroprodotto = Column(Integer, ForeignKey('prodotti.numeroprodotto'))
     prodotto = relation('Prodotti')
 
-    numeroeanprodotto = Column(Integer, ForeignKey('eanprodotti.numeroeanprodotto'))    
-    eanprodotto = relation('Eanprodotti')    
-    qta = Column(Float)    
+    numeroeanprodotto = Column(Integer, ForeignKey('eanprodotti.numeroeanprodotto'))
+    eanprodotto = relation('Eanprodotti')
+    qta = Column(Float)
     prezzo = Column(Float)
     """
     @property
     def cost(self):
-        
+
         perms = set()
         for g in self.groups:
             perms = perms | set(g.permissions)
-        return perms  
-    """      
+        return perms
+    """
 
 
 
@@ -695,38 +715,38 @@ class Inventarirconta(DeclarativeBase):
     __tablename__='inventarirconta'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
     sincroserverfield = Column(Integer)
-    numeroinventario = Column(Integer, ForeignKey('inventarit.numeroinventario')) 
+    numeroinventario = Column(Integer, ForeignKey('inventarit.numeroinventario'))
     inventario = relation('Inventarit', backref='inventarirconta')
-    numerorigainventarioconta = Column(Integer, contarigainventarioconta, autoincrement=True, primary_key=True)    
-    
-    numeroprodotto = Column(Integer, ForeignKey('prodotti.numeroprodotto'))    
+    numerorigainventarioconta = Column(Integer, contarigainventarioconta, autoincrement=True, primary_key=True)
+
+    numeroprodotto = Column(Integer, ForeignKey('prodotti.numeroprodotto'))
     prodotto = relation('Prodotti')
 
-    qta = Column(Float, default=0)  
-    qtaconf = Column(Float, default=0)   
-    conf = Column(Float, default=0) 
+    qta = Column(Float, default=0)
+    qtaconf = Column(Float, default=0)
+    conf = Column(Float, default=0)
     costo = Column(Float, default=0)
-    costo2 = Column(Float, default=0) 
-    totale_qta = Column(Float, default=0)       
-    totale_costo = Column(Float, default=0) 
-    datacosto = Column(DateTime)    
+    costo2 = Column(Float, default=0)
+    totale_qta = Column(Float, default=0)
+    totale_costo = Column(Float, default=0)
+    datacosto = Column(DateTime)
     """
     @property
     def cost(self):
-        
+
         perms = set()
         for g in self.groups:
             perms = perms | set(g.permissions)
-        return perms  
-    """  
-    
+        return perms
+    """
+
 class Aggiornaic(DeclarativeBase):
     __tablename__='aggiornaic'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
     sincroserverfield = Column(Integer)
-    numeroinventario = Column(Integer, ForeignKey('inventarit.numeroinventario')) 
+    numeroinventario = Column(Integer, ForeignKey('inventarit.numeroinventario'))
     inventario = relation('Inventarit', backref='aggiornaic')
-    status = Column(Integer)         
+    status = Column(Integer)
     email = Column(Unicode(50))
     richiesta = Column(DateTime)
     fine = Column(DateTime)
@@ -744,50 +764,56 @@ class Alias(DeclarativeBase):
     __tablename__='alias'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True)
     sincroserverfield = Column(Integer)
-    numeroalias = Column(Integer, contaalias,  autoincrement=True,primary_key=True)    
-    tipoprodotto = Column(Unicode(3), default=u'PRD') 
+    numeroalias = Column(Integer, contaalias,  autoincrement=True,primary_key=True)
+    tipoprodotto = Column(Unicode(3), default=u'PRD')
     numeroprodotto = Column(Integer, ForeignKey('prodotti.numeroprodotto'))
-    prodotto = relation('Prodotti', backref='aliases')    
+    prodotto = relation('Prodotti', backref='aliases')
     numeroeanprodotto=Column(Integer, ForeignKey('eanprodotti.numeroeanprodotto'))
-    eanprodotto = relation('Eanprodotti', backref='aliases')      
+    eanprodotto = relation('Eanprodotti', backref='aliases')
     alias = Column(Unicode(30))
-       
+
 class Inputb2b(DeclarativeBase):
     __tablename__='input_b2b'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True)
     sincroserverfield = Column(Integer)
-    b2b_id = Column(Integer, contab2b,  autoincrement=True,primary_key=True) 
-    supplier_id = Column(Integer, ForeignKey(Provenienze.numeroprovenienza))  
-    supplier = relation(Provenienze)
+    b2b_id = Column(Integer, contab2b,  autoincrement=True,primary_key=True)
+    supplier_id = Column(Integer)#, ForeignKey(Provenienze.numeroprovenienza))
+
+    #supplier = relation(Provenienze)
+
     supplier_code = Column(String(50))
-    record = Column(String(50))    
+    record = Column(String(50))
     filename = Column(String(50))
     content = Column(BLOB)
     processed = Column(Integer, default = 0)
     booked = Column(Integer, default = 0) # to financial system
     exported = Column(Integer, default = 0) # to dbretail
-    closed = Column(Integer, default=0)     
+    closed = Column(Integer, default=0)
     acquired = Column(DateTime, default=datetime.now())
     updated = Column(DateTime, default = datetime.now())
-    
+    @property
+    def supplier(self):
+        return DBSession.query(Provenienze).filter_by(numeroprovenienza=self.supplier_id).one()
+
+
 class Tipologieprodotti(DeclarativeBase):
     __tablename__='tipologieprodotti'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True)
     sincroserverfield = Column(Integer)
-    numerotipologiaprodotto = Column(Integer, autoincrement=True,primary_key=True)        
-    codicetipologiaprodotto = Column(Integer)    
-    tipologiaprodotto = Column(Unicode(50)) 
+    numerotipologiaprodotto = Column(Integer, autoincrement=True,primary_key=True)
+    codicetipologiaprodotto = Column(Integer)
+    tipologiaprodotto = Column(Unicode(50))
 
 
 class Produttori(DeclarativeBase):
     __tablename__='produttori'
     sincrofield = Column(Integer, contasincrofield , autoincrement=True)
     sincroserverfield = Column(Integer)
-    numeroproduttore = Column(Integer, autoincrement=True,primary_key=True)           
-    produttore = Column(Unicode(50))     
-  
+    numeroproduttore = Column(Integer, autoincrement=True,primary_key=True)
+    produttore = Column(Unicode(50))
 
 
 
-   
-         
+
+
+

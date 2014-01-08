@@ -24,23 +24,23 @@ from sqlalchemy.orm import aliased
 def get_stock(id, *args, **kw):
     """
     """
-    def level1( item ): 
+    def level1( item ):
         return (item[1], item[2])
-    def level2( item ): 
+    def level2( item ):
         return item[1].reparto
     ret = None
-    ret = DBSession.query(Inventarir, Prodotti, 
-                            Inventarirconta 
+    ret = DBSession.query(Inventarir, Prodotti,
+                            Inventarirconta
                             )
     ret = ret.join(Prodotti, Inventarir.numeroprodotto == Prodotti.numeroprodotto)
     ret = ret.outerjoin(Inventarirconta, and_(Prodotti.numeroprodotto == Inventarirconta.numeroprodotto,
-                                        Inventarirconta.numeroinventario==id) )   
+                                        Inventarirconta.numeroinventario==id) )
     #ret = ret.join(Reparti, Prodotti.numeroreparto == Reparti.numeroreparto)
     ret = ret.filter(Inventarir.numeroinventario==id)
     #print ret
-    ret = ret.order_by(Prodotti.numeroreparto, Prodotti.prodotto).all() 
-    
-    ret = groupby(ret, level2) 
+    ret = ret.order_by(Prodotti.numeroreparto, Prodotti.prodotto).all()
+
+    ret = groupby(ret, level2)
     results = OrderedDict()
     for cat, products in ret:
         #prods = [x for x in products]
@@ -54,16 +54,16 @@ def get_stock(id, *args, **kw):
 def get_stock_cogs(id, *args, **kw):
     """
     """
-    def level1( item ): 
+    def level1( item ):
         return (item[1], item[0])
-    def level2( item ): 
+    def level2( item ):
         return item[1].reparto
     ret = None
     ret = DBSession.query(Inventarirconta, Prodotti).filter(Inventarirconta.numeroinventario==id)
-    ret = ret.outerjoin(Prodotti, and_(Prodotti.numeroprodotto == Inventarirconta.numeroprodotto)) 
-    ret = ret.order_by(Prodotti.numeroreparto, Prodotti.prodotto).all() 
-    
-    ret = groupby(ret, level2) 
+    ret = ret.outerjoin(Prodotti, and_(Prodotti.numeroprodotto == Inventarirconta.numeroprodotto))
+    ret = ret.order_by(Prodotti.numeroreparto, Prodotti.prodotto).all()
+
+    ret = groupby(ret, level2)
     results = OrderedDict()
     for cat, products in ret:
         #prods = [x for x in products]
@@ -71,22 +71,22 @@ def get_stock_cogs(id, *args, **kw):
         for inv,prod in products:
             #
             results[cat].append((prod,inv))
-            			
+
     return results
-    
+
 def get_stock_report(id, *args, **kw):
     """
     """
-    def level1( item ): 
+    def level1( item ):
         return (item[1], item[0])
-    def level2( item ): 
+    def level2( item ):
         return item[1].reparto
     ret = None
     ret = DBSession.query(Inventarirconta, Prodotti).filter(Inventarirconta.numeroinventario==id)
-    ret = ret.outerjoin(Prodotti, and_(Prodotti.numeroprodotto == Inventarirconta.numeroprodotto)) 
-    ret = ret.order_by(Prodotti.numeroreparto, Prodotti.prodotto).all() 
-    
-    ret = groupby(ret, level2) 
+    ret = ret.outerjoin(Prodotti, and_(Prodotti.numeroprodotto == Inventarirconta.numeroprodotto))
+    ret = ret.order_by(Prodotti.numeroreparto, Prodotti.prodotto).all()
+
+    ret = groupby(ret, level2)
     results = OrderedDict()
     for cat, products in ret:
         #prods = [x for x in products]
@@ -94,50 +94,50 @@ def get_stock_report(id, *args, **kw):
         for inv,prod in products:
             #
             results[cat].append((prod,inv))
-            			
-    return results    
-    
+
+    return results
+
 def get_pricelist(id, date=None, *args, **kw):
     """
     """
 
     if not date:
-        date=datetime.now()    
-    def level1( item ): 
+        date=datetime.now()
+    def level1( item ):
         return (item[1], item[2])
-    def level2( item ): 
+    def level2( item ):
         return item[1].reparto
     ret = None
-    ret = DBSession.query(Prodottiprovenienze, Prodotti, 
-                            Listiniprovenienze  
+    ret = DBSession.query(Prodottiprovenienze, Prodotti,
+                            Listiniprovenienze
                             )
     ret = ret.join(Prodotti, Prodottiprovenienze.numeroprodotto == Prodotti.numeroprodotto)
     ret = ret.outerjoin(Listiniprovenienze, and_(
                     Listiniprovenienze.validodal <= date,
                     Listiniprovenienze.validoal > date,
                     Listiniprovenienze.numeroprovenienza == id,
-                    Listiniprovenienze.numeroprodottoprovenienza == Prodottiprovenienze.numeroprodottoprovenienza) )   
+                    Listiniprovenienze.numeroprodottoprovenienza == Prodottiprovenienze.numeroprodottoprovenienza) )
     #ret = ret.join(Reparti, Prodotti.numeroreparto == Reparti.numeroreparto)
     ret = ret.filter(and_(Prodottiprovenienze.numeroprovenienza==id,
                             #Prodottiprovenienze.codiceprodottoprovenienza=='588626'
                             )
     ).order_by(Prodottiprovenienze.codiceprodottoprovenienza)
 
-          
+
     ret = ret.all()
- 
+
     return ret
-    
+
 def get_pricelist_todict(plist_obj, prov):
     """
     Get pricelist by supplier_code
     """
-   
+
     pricelist = {}
     for p in plist_obj:
-        ret_tmp = {} 
+        ret_tmp = {}
         ret_tmp['prodottiprovenienze.numeroprovenienza'] = prov.numeroprovenienza
-  
+
         for obj in p:
             newobjs = [obj]
             if hasattr(obj, '__tablename__'):
@@ -152,35 +152,39 @@ def get_pricelist_todict(plist_obj, prov):
                     if obj.ean:
                         newobjs.append(obj.ean)
                 for pobj in newobjs:
-                    prefix = pobj.__tablename__                    
+                    prefix = pobj.__tablename__
                     for key, val in pobj.__dict__.iteritems():
                         if not key.startswith('_'):
-                            ret_tmp["%s.%s"%(prefix, key)] = val               
- 
+                            ret_tmp["%s.%s"%(prefix, key)] = val
+
         pricelist[ret_tmp['prodottiprovenienze.codiceprodottoprovenienza']]=ret_tmp
-        #sys.exit() 
+        #sys.exit()
     return pricelist
-    
-def get_latest_cogs(prod_id, cost_center_id, date=None):
+
+def get_latest_cogs(prod_id, cost_center_id=None, date=None):
     if not date:
         date=datetime.now()
-        
-    ret_query = DBSession.query(Movimentir,Movimentit).order_by(Movimentit.datadocumento.desc()).filter(and_(
-        Movimentir.numeromagazzino==cost_center_id,
+
+    if cost_center_id:
+        andclause = [
+        Movimentir.numeromagazzino==cost_center_id
+        ]
+    else:
+        andclause = []
+    andclause = andclause + [
         Movimentir.codiceqta=='CARICO',
-        Movimentit.datadocumento<=date,  
-        #Movimentir.idprodotto==prod_id, 
-        Movimentir.idprodotto==prod_id, 
+        Movimentit.datadocumento<=date,
+        #Movimentir.idprodotto==prod_id,
+        Movimentir.idprodotto==prod_id,
         Movimentit.numeromovimento>=0,
         Movimentit.numeroazienda>=0,
         Movimentit.tipodocumento=='CAR',
         Movimentir.numerorigamovimento>=0,
-        Movimentir.numeromovimento>=0
-        )).join(Movimentit, 
+        Movimentir.numeromovimento>=0]
+    ret_query = DBSession.query(Movimentir,Movimentit).order_by(Movimentit.datadocumento.desc()).filter(and_(**andclause)).join(Movimentit,
             Movimentir.numeromovimento == Movimentit.numeromovimento
          ).limit(1)
-    #print ret_query
-    print prod_id, date
+
     ret = ret_query.first()
     if ret:
         mov, doc = ret
@@ -190,14 +194,14 @@ def get_latest_cogs(prod_id, cost_center_id, date=None):
     cost_date = None
     if mov:
         if mov.prezzo:
-			latest_cost = mov.prezzo
-			cost_date = mov.movimento.datadocumento
-			
+            latest_cost = mov.prezzo
+            cost_date = mov.movimento.datadocumento
+
     if latest_cost == 0:
-		if mov:
-			if mov.prodotto:
-				latest_cost = mov.prodotto.costonetto
-				cost_date = mov.prodotto.dataultimocosto
+        if mov:
+            if mov.prodotto:
+                latest_cost = mov.prodotto.costonetto
+                cost_date = mov.prodotto.dataultimocosto
     return latest_cost, cost_date
 
 
@@ -206,38 +210,38 @@ def get_latest_cogs(prod_id, cost_center_id, date=None):
 def get_latest_fact_cogs(DBSession, prod_id, cost_center_id, date=None):
     if not date:
         date=datetime.now()
-        
+
     ret_query = DBSession.query(Factcogs).filter(and_(
         Factcogs.cost_center_id==cost_center_id,
-        Factcogs.doc_date<=date,  
-        Factcogs.prod_id==prod_id,             
+        Factcogs.doc_date<=date,
+        Factcogs.prod_id==prod_id,
         )).order_by(Factcogs.doc_date.desc())
     cost = ret_query.first()
     if cost:
         return float(0) or cost.cost
     else:
         return float(0)
-    
+
 def get_mov(id, *args, **kw):
     """
     >>> codmov=['FACFOR', 'FATFOR']
 
     """
- 
+
     from pprint import pprint
 
     #contiricavo = aliased(Conticontabilita)
 
     tables = (
-                Movimentit, 
-                Movimentir, 
-                Magazzini, 
-                Conticontabilita, 
-                Iva, 
-                Reparti, 
-                Prodotti, 
-                Eanprodotti, 
-                Prodottiprovenienze, 
+                Movimentit,
+                Movimentir,
+                Magazzini,
+                Conticontabilita,
+                Iva,
+                Reparti,
+                Prodotti,
+                Eanprodotti,
+                Prodottiprovenienze,
                 Listiniprovenienze
                 )
     columns = []
@@ -250,55 +254,55 @@ def get_mov(id, *args, **kw):
 
 
     movst = DBSession.query(*query_args)#, Prodotti, Eanprodotti, )
-    movst = movst.filter(Movimentit.numeromovimento==id)  
-         
+    movst = movst.filter(Movimentit.numeromovimento==id)
+
 
     # movimentir
     movst = movst.join(Movimentir,and_(
                 Movimentit.numeromovimento == Movimentir.numeromovimento,
-                Movimentir.tipoprodotto!="NIL") 
+                Movimentir.tipoprodotto!="NIL")
                 )
-               
+
     # magazzini
-    movst = movst.outerjoin(Magazzini, Magazzini.numeromagazzino == Movimentir.numeromagazzino) 
-   
+    movst = movst.outerjoin(Magazzini, Magazzini.numeromagazzino == Movimentir.numeromagazzino)
+
     # conticosto
-    movst = movst.outerjoin(Conticontabilita, 
-            Conticontabilita.numerocontocontabilita==Movimentir.numerocontocontabilita)   
+    movst = movst.outerjoin(Conticontabilita,
+            Conticontabilita.numerocontocontabilita==Movimentir.numerocontocontabilita)
     # iva
-    movst = movst.outerjoin(Iva, 
-            Iva.numeroiva==Movimentir.numeroiva)             
+    movst = movst.outerjoin(Iva,
+            Iva.numeroiva==Movimentir.numeroiva)
     # reparti
-    movst = movst.outerjoin(Reparti, Reparti.numeroreparto==Movimentir.numeroreparto)    
+    movst = movst.outerjoin(Reparti, Reparti.numeroreparto==Movimentir.numeroreparto)
     # prodotti
     movst = movst.outerjoin(Prodotti, Prodotti.numeroprodotto==Movimentir.idprodotto)
     # eanprodotti
-    movst = movst.outerjoin(Eanprodotti, 
-            Eanprodotti.numeroeanprodotto==Movimentir.numeroeanprodotto)    
+    movst = movst.outerjoin(Eanprodotti,
+            Eanprodotti.numeroeanprodotto==Movimentir.numeroeanprodotto)
     # prodottiprovenienza
-    movst = movst.outerjoin(Prodottiprovenienze, 
+    movst = movst.outerjoin(Prodottiprovenienze,
             and_(Prodottiprovenienze.numeroeanprodotto==Movimentir.numeroeanprodotto,
-            
+
                  Prodottiprovenienze.numeroprovenienza==Movimentit.numeroprovenienza,
                  Prodottiprovenienze.codiceprodottoprovenienza==Movimentir.codice )
-                 )            
+                 )
     # listiniprovenienza
-       
-    movst = movst.outerjoin(Listiniprovenienze, 
+
+    movst = movst.outerjoin(Listiniprovenienze,
                and_(
                     Listiniprovenienze.validodal <= Movimentit.datadocumento,
                     Listiniprovenienze.validoal > Movimentit.datadocumento,
                     Listiniprovenienze.numeroprovenienza == Movimentit.numeroprovenienza,
      Listiniprovenienze.numeroprodottoprovenienza == Prodottiprovenienze.numeroprodottoprovenienza,
      )
-                        )  
-             
-              
+                        )
+
+
     movst = movst.order_by(Movimentit.datadocumento)
-    
-    movst = movst.all() 
-    
+
+    movst = movst.all()
+
     ret = [dict(zip(columns, i)) for i in movst]
     return ret
 
-    
+

@@ -175,8 +175,11 @@ class Factb2b(DeclarativeBase):
     sincroserverfield = Column(Integer)
     instablog = Column(Integer)
     updtablog = Column(Integer)
-    supplier_id = Column(Integer, ForeignKey('provenienze.numeroprovenienza'))
-    supplier = relation(Provenienze)
+    supplier_id = Column(Integer)#, ForeignKey('provenienze.numeroprovenienza'))
+    @property
+    def supplier(self):
+        return DBSession.query(Provenienze).filter_by(numeroprovenienza=self.supplier_id).one()
+    #supplier = relation(Provenienze)
     header = Column(String(20))
     row = Column(String(20))
     doc_date = Column(DateTime)

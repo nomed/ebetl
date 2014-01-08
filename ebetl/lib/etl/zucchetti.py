@@ -1,5 +1,18 @@
 # -*- coding: utf-8 -*-
 """
+from ebetl.model import *
+index = 0
+movs=DBSession.query(Movimentir).filter(and_(Movimentir.numeromovimento==576182, Movimentir.tipoprodotto=='PRD')).all()
+for i in movs:
+    print i
+    p = DBSession.query(Prodotti).filter_by(numeroprodotto=i.idprodotto).one()
+    if not i.prezzonetto/4 > p.costonetto:
+        i.costonetto = p.costonetto
+        i.totalecostonetto = i.qtamovimento * i.costonetto
+        index = index +1
+        print index
+        DBSession.add(i)
+        DBSession.flush()
 
 
 """
