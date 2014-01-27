@@ -84,6 +84,7 @@ setup(
     mailman = ebetl.commands.mailman:Mailman
     zucchetti = ebetl.commands.zucchetti:Zucchetti
     pl-big = ebetl.commands.listini.big:Big
+    mycommand = ebetl.commands.mycommand:MyCommand
     #fidelity= ebetl.commands.fidelity:Fidelity
     #fatmicro = ebetl.commands.fatmicro:Fatmicro
     #ftpacquire = ebetl.commands.ftpacquire:Ftpacquire
