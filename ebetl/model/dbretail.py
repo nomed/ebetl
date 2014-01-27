@@ -8,7 +8,7 @@ from datetime import datetime
 from hashlib import sha256
 #__all__ = ['User', 'Group', 'Permission']
 
-from sqlalchemy import Table, ForeignKey, Column, Sequence, UniqueConstraint, and_, or_
+from sqlalchemy import Table, ForeignKey, Column, Sequence, UniqueConstraint, and_, or_, distinct
 from sqlalchemy.types import Unicode, Integer, BigInteger, DateTime, Float, String, Date, BLOB
 from sqlalchemy.orm import relation, synonym, backref
 from sqlalchemy.sql import label
@@ -393,7 +393,7 @@ class Movimentit(DeclarativeBase):
     #contocorrente
     #note
     controllonote=Column(Integer)
-    #documentoannullato =
+    documentoannullato = Column(DateTime)
     #pk
     #numeronazione
     #prefissopartitaiva
@@ -519,6 +519,23 @@ class Movimentir(DeclarativeBase):
     ordine = Column(Integer)
     #pk
 
+class Gruppipos(DeclarativeBase):
+    __tablename__='gruppipos'
+    #logicdelete
+    sincrofield = Column(Integer, contasincrofield , autoincrement=True, primary_key=True)
+    #sincroserverfield
+    #instablog
+    #updtablog
+    numerogruppopos = Column(Integer, autoincrement=True, primary_key=True)
+    gruppopos = Column(String(50))
+
+class Pos(DeclarativeBase):
+    __tablename__='pos'
+    numeropos = Column(Integer, autoincrement=True, primary_key=True)
+    numerogruppopos = Column(Integer, ForeignKey('gruppipos.numerogruppopos'))
+    gruppopos = relation('Gruppipos',  backref='pos')
+
+
 class Ricevutet(DeclarativeBase):
     __tablename__='ricevutet'
     #logicdelete
@@ -529,7 +546,8 @@ class Ricevutet(DeclarativeBase):
     numeromovimento = Column(Integer, autoincrement=True, primary_key=True)
     numerogiorno = Column(Integer)
     numerogiornopos = Column(Integer)
-    numeropos = Column(Integer)
+    numeropos = Column(Integer, ForeignKey('pos.numeropos'))
+    pos = relation('Pos',  backref='ricevutet')
     numerooperatore = Column(Integer)
     numerodipendente = Column(Integer)
     numeroclientefid = Column(Integer)
