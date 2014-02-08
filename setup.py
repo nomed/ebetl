@@ -85,6 +85,8 @@ setup(
     zucchetti = ebetl.commands.zucchetti:Zucchetti
     pl-big = ebetl.commands.listini.big:Big
     mycommand = ebetl.commands.mycommand:MyCommand
+    lilliput = ebetl.commands.lilliput:Lilliput
+    exportanag = ebetl.commands.exportanag:Export
     #fidelity= ebetl.commands.fidelity:Fidelity
     #fatmicro = ebetl.commands.fatmicro:Fatmicro
     #ftpacquire = ebetl.commands.ftpacquire:Ftpacquire

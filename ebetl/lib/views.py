@@ -327,13 +327,56 @@ def get_mov(id, *args, **kw):
     ret = [dict(zip(columns, i)) for i in movst]
     return ret
 
-from datetime import datetime as dt
-from datetime import timedelta as td
+import transaction
 from prettytable import PrettyTable
+from prettytable import NONE
+from tg import config
+from sqlalchemy import create_engine, MetaData, Table, and_, Float, select, func
+from sqlalchemy.orm import sessionmaker, relationship , joinedload
+from sqlalchemy.ext.declarative import declarative_base
+
+class Syncobj(object):
+
+    def __init__(self, config):
+        self.config = config
+        self.dest = config.get('lilliput.dburl')
+
+        #log.debug("^^^^^^   END_SMETA.REFLECT")
+        #log.debug("^^^^^^ START_SMETA.DEST")
+        self.destination, self.dengine = self.make_session(self.dest)
+        self.dmeta = MetaData(bind=self.dengine)
+        self.dmeta.reflect(self.dengine)
+
+    def make_session(self,connection_string):
+
+        #log.debug('')
+        #log.debug('^^^^^^ START_MAKE_SESSION')
+
+        if connection_string.startswith('firebird'):
+            engine = create_engine(connection_string, echo=False,
+                                   convert_unicode=False)
+        else:
+            engine = create_engine(connection_string, echo=False,
+                                   convert_unicode=True)
+        Session = sessionmaker(bind=engine)
+        #log.debug('')
+        #log.debug('^^^^^^ END_MAKE_SESSION')
+        return Session(), engine
+
+    def quick_mapper(self,table):
+        #log.debug('')
+        #log.debug('^^^^^^ START_QUICK_MAPPER')
+        Base = declarative_base()
+        class GenericMapper(Base):
+            __table__ = table
+        #log.debug('')
+        #log.debug('^^^^^^ END_QUICK_MAPPER')
+        return GenericMapper
 
 
-def get_dailytotals(day, *args, **kw):
-    date = dt.strptime("20131201", "%Y%m%d")
+
+def get_dailytotals(fromd, tod, *args, **kw):
+
     # document final price
     # vat_total = Factb2b.b2b_net_total * Factb2b.b2b_vat_code/100
     # gross_total = Factb2b.b2b_net_total + vat_total
@@ -341,7 +384,33 @@ def get_dailytotals(day, *args, **kw):
     # lis_fp =  Factb2b.supplier_item_discount*Factb2b.supplier_item_unit_price
     # contract total
     # lis_ct = lis_fp * Factb2b.b2b_uom_qty
-    # b2b_fp = Factb2b.b2b_unit_price*Factb2b.b2b_disc
+    # b2b_fp = Factb2b.b2b_unit_price*Factb2b.b2b_di
+    syncobj = Syncobj(config)
+    Base = declarative_base()
+    Base.metadata.reflect(syncobj.dengine)
+    class Report(Base):
+        __tablename__ = 'micros_report'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class Location(Base):
+        __tablename__ = 'dim_location'
+        __table_args__ = (
+            {'autoload':True}
+            )
+
+
+    fltr = [
+
+        Movimentit.tipoprovenienza == 'POS',
+        Movimentit.codicemovimento == 'VENDITA',
+        Movimentit.tipodocumento == 'VEN',
+        Movimentit.datamovimento >= fromd,
+        Movimentit.datamovimento < tod,
+
+
+    ]
+    """
     groupby = [Gruppipos.numerogruppopos, Gruppipos.gruppopos,
                Movimentir.numeroreparto, Reparti.reparto]
     query_lst = groupby + [
@@ -352,19 +421,11 @@ def get_dailytotals(day, *args, **kw):
         func.sum(Movimentir.totale),
     ]
 
-    fltr = [
 
-        Movimentit.tipoprovenienza == 'POS',
-        Movimentit.codicemovimento == 'VENDITA',
-        Movimentit.tipodocumento == 'VEN',
-        Movimentit.datamovimento >= date,
-        Movimentit.datamovimento < date + td(days=1),
-
-
-    ]
     ret = DBSession.query(*query_lst)
     ret = ret.group_by(*groupby)
     ret = ret.join(Pos, Gruppipos.numerogruppopos == Pos.numerogruppopos)
+    ret = ret.join(Pos, Gruppipos.numeromagazzino == Magazzini.numeromagazzino)
     ret = ret.join(Ricevutet, Pos.numeropos == Ricevutet.numeropos)
     ret = ret.join(
         Movimentit, Ricevutet.numeromovimento == Movimentit.numeromovimento)
@@ -373,16 +434,23 @@ def get_dailytotals(day, *args, **kw):
     ret = ret.outerjoin(
         Reparti, Movimentir.numeroreparto == Reparti.numeroreparto)
     ret = ret.filter(and_(*fltr))
-    ret = ret.all()
+    #ret = ret.all()
     x = PrettyTable(
         ["pos_num", "pdv", "rep_num", "rep", "net_total", "vat_total", "gross_total"])
 
-    for r in ret:
-        x.add_row(r)
-    print x
+    #for r in ret:
+    #    x.add_row(r)
+    #print x
+    """
+    groupby = [
 
-    groupby = [Gruppipos.gruppopos, Pos.numeropos]
+        Magazzini.codicemagazzino,
+        func.extract('year',Movimentit.datamovimento),
+        func.extract('month',Movimentit.datamovimento),
+        func.extract('day', Movimentit.datamovimento),
+        ]
     query_lst = groupby + [
+
         func.count(distinct(Movimentit.numeromovimento)),
         func.sum(Movimentir.totale) / func.count(
             distinct(Movimentit.numeromovimento)),
@@ -393,6 +461,7 @@ def get_dailytotals(day, *args, **kw):
 
     ret = DBSession.query(*query_lst)
     ret = ret.group_by(*groupby)
+    ret = ret.join(Gruppipos, Gruppipos.numeromagazzino == Magazzini.numeromagazzino)
     ret = ret.join(Pos, Gruppipos.numerogruppopos == Pos.numerogruppopos)
     ret = ret.join(Ricevutet, Pos.numeropos == Ricevutet.numeropos)
     ret = ret.join(
@@ -402,11 +471,41 @@ def get_dailytotals(day, *args, **kw):
 
     ret = ret.filter(and_(*fltr))
     ret = ret.all()
-    x = PrettyTable(
-        ["pos_num", "pdv", "customers", "sph", "net_total", "vat_total", "gross_total"])
+    headers = ["location_stock","year","month","day", "checks", "sph", "net_total", "vat_total", "gross_total"]
 
+    x = PrettyTable(
+        ["location_stock","year","month","day", "checks", "sph", "net_total", "vat_total", "gross_total"])
+    results = []
     for r in ret:
+        jdict = dict(zip(headers, r))
+        location_stock = jdict.get('location_stock')
+        locobj = syncobj.destination.query(Location).filter_by(
+                      location_stock=location_stock).one()
+        team_id = locobj.location_id
+        year = jdict.get('year')
+        month = jdict.get('month')
+        day = jdict.get('day')
+        try:
+            report = syncobj.destination.query(Report).filter(and_(
+                      Report.team_id==team_id,
+                      Report.year==year,
+                      Report.month==month,
+                      Report.day==day)).one()
+            print report
+            for k,v in jdict.iteritems():
+                if hasattr(report, k):
+                    setattr(report,k,v)
+            syncobj.destination.add(report)
+            syncobj.destination.flush()
+        except:
+            pass
         x.add_row(r)
+    transaction.commit()
+    x.float_format = "8.2"
+    x.align = "r"
+    x.align['location_stock'] = "l"
+    x.header=False
+    x.hrules = NONE
     print x
 
     return ret

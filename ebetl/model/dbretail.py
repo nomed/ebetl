@@ -131,6 +131,7 @@ class Prodotti(DeclarativeBase):
     codiceprodotto = Column(String(20))
     prodottobreve = Column(String(20))
     prodotto = Column(String(40))
+    descrizioneestesa = Column(String(40))
     numerotipologiaprodotto = Column(Integer)
     numeroproduttore = Column(Integer)
     datainserimento = Column(DateTime)
@@ -528,6 +529,8 @@ class Gruppipos(DeclarativeBase):
     #updtablog
     numerogruppopos = Column(Integer, autoincrement=True, primary_key=True)
     gruppopos = Column(String(50))
+    numeromagazzino = Column(Integer, ForeignKey('magazzini.numeromagazzino'))
+    magazzino = relation('Magazzini',  backref='gruppipos')
 
 class Pos(DeclarativeBase):
     __tablename__='pos'
