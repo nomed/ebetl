@@ -89,11 +89,15 @@ class Lilliput(Command):
     def command(self):
         config=load_config(self.args)
         from ebetl.lib.views import get_dailytotals,get_dailymenuitems, sync_do, sync_dmi, sync_lilliput
-        fromd = dt.strptime(self.options.fromd, "%Y%m%d")
+        if self.options.fromd:
+            fromd = dt.strptime(self.options.fromd, "%Y%m%d")
         if self.options.tod:
             tod = dt.strptime(self.options.tod, "%Y%m%d") + td(days=1)
         else:
-            tod = fromd + td(days=1)
+            try:
+                tod = fromd + td(days=1)
+            except:
+                pass
         if self.options.items:
             #(u'000351', 1, u'351 ARQUATA', 2014, 1, 2, 1, u'PANETTERIA', 17, u'PANETTERIA', 207.73120000000006, 8.308799999999996, 216.03999999999996)
             retly_tmp = get_dailymenuitems(fromd - rd(years=1), tod - rd(years=1))
@@ -136,7 +140,7 @@ class Lilliput(Command):
             #    print "|".join(p)   
             sync_dmi(results)                                                                                              
 
-        else:    
+        elif not self.options.sync:    
             # (u'000297', 2013, 1, 8, 396, 14.901287878787729, 5396.611399999985, 504.2985999999985, 5900.909999999941)
             retly_tmp = get_dailytotals(fromd - rd(years=1), tod - rd(years=1))
             retly = []
