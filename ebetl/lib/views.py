@@ -697,9 +697,7 @@ def sync_lilliput(*args, **kw):
         __table_args__ = (
             {'autoload':True}
 
-    reports = DBSession.query(Report).filter(and_(
-                Report.report_id=None,        
-        )
+    reports = syncobj.destination.query(Report).filter(and_(Report.report_id==None)).all()
     for report in reports:
         if not report.report_id:
             fltr = [
