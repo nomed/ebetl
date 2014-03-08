@@ -7,15 +7,14 @@ from argparse import ArgumentParser
 
 from paste.deploy import appconfig
 from ebetl.config.environment import load_environment
-from ebetl import model
-from ebetl.lib.etl.b2b import B2bObj
+from ebetl.model import *
 from paste.script.command import Command
 from ebetl.commands import load_config
 
 
     
 class Mailman(Command):
-    summary = "Process dbretail"
+    summary = "Process email addresses"
     usage = "paster mailman [options]"
     group_name = "ebetl.mailman"
     parser = Command.standard_parser(verbose=False)  
@@ -32,10 +31,10 @@ class Mailman(Command):
             cfs = DBSession.query(Clientifid).filter(Clientifid.email!=' ').all()
             output = []
             for c in cfs:
-				output.append('"%s %s" <%s>'%(c.nome, c.cognome, c.email))
+			output.append('"%s %s" <%s>'%(c.nome, c.cognome, c.email))
 			f = open(self.options.export, 'w')
 			for o in output:
-				print >> f, o
+				print >> f, o.encode('utf-8')
 			f.close()
 	    
 

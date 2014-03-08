@@ -509,7 +509,6 @@ def get_dailytotals(fromd, tod, *args, **kw):
     # lis_ct = lis_fp * Factb2b.b2b_uom_qty
     # b2b_fp = Factb2b.b2b_unit_price*Factb2b.b2b_di
 
-
     #Movimentit_ly = aliased(Movimentit, name='Movimentit_ly')
     #Movimentir_ly = aliased(Movimentir, name='Movimentir_ly')    
     #Ricevutet_ly = aliased(Ricevutet, name='Ricevutet_ly')
@@ -661,6 +660,7 @@ def sync_do(lines, *args, **kw):
         syncobj.destination.add(report)
         syncobj.destination.flush()
     transaction.commit()
+    
     #x.float_format = "8.2"
     #x.align = "r"
     #x.align['location_stock'] = "l"
@@ -695,11 +695,9 @@ def sync_lilliput(*args, **kw):
     class VatReport(Base):
         __tablename__ = 'micros_vatfee'
         __table_args__ = (
-            {'autoload':True}
+            {'autoload':True})
 
-    reports = DBSession.query(Report).filter(and_(
-                Report.report_id=None,        
-        )
+    reports = syncobj.destination.query(Report).filter(and_(Report.report_id==None)).all()    
     for report in reports:
         if not report.report_id:
             fltr = [
