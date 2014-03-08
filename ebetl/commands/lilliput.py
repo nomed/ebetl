@@ -79,13 +79,16 @@ class Lilliput(Command):
     parser.add_option("-t", "--to",
                   dest="tod",
                   help="A Data")
+    parser.add_option("-s", "--sync",
+                       dest="sync",metavar='sync',
+                      help="Sync lilliput (fiscal) reports")                
     (options, args) = parser.parse_args()
 
 
 
     def command(self):
         config=load_config(self.args)
-        from ebetl.lib.views import get_dailytotals,get_dailymenuitems, sync_do, sync_dmi
+        from ebetl.lib.views import get_dailytotals,get_dailymenuitems, sync_do, sync_dmi, sync_lilliput
         fromd = dt.strptime(self.options.fromd, "%Y%m%d")
         if self.options.tod:
             tod = dt.strptime(self.options.tod, "%Y%m%d") + td(days=1)
@@ -174,10 +177,8 @@ class Lilliput(Command):
             #    print "|".join(p)
             sync_do(results)
             #print results                          
-
-                                
-        
-        #print sales
+        if self.options.sync:
+            sync_lilliput()
 
 
 

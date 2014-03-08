@@ -668,3 +668,76 @@ def sync_do(lines, *args, **kw):
     #x.hrules = NONE
     #print x
 
+def sync_lilliput(*args, **kw):
+    syncobj = Syncobj(config)
+    Base = declarative_base()
+    Base.metadata.reflect(syncobj.dengine)
+    class Report(Base):
+        __tablename__ = 'fact_do'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class Location(Base):
+        __tablename__ = 'dim_location'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class FiscalReport(Base):
+        __tablename__ = 'micros_report'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class CashReport(Base):
+        __tablename__ = 'micros_cash_report'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class VatReport(Base):
+        __tablename__ = 'micros_vatfee'
+        __table_args__ = (
+            {'autoload':True}
+
+    reports = DBSession.query(Report).filter(and_(
+                Report.report_id=None,        
+        )
+    for report in reports:
+        if not report.report_id:
+            fltr = [
+                FiscalReport.team_id == report.team_id,
+                FiscalReport.year == report.year,
+                FiscalReport.month == report.month,
+                FiscalReport.day == report.day,
+                FiscalReport.acquired == 1,
+                ]
+            groupby = [
+                FiscalReport.report_id,               
+                FiscalReport.team_id,
+                FiscalReport.year,
+                FiscalReport.month,
+                FiscalReport.day,
+                ] 
+            query_lst = groupby + [
+                func.sum(VatReport.amount),#'total',
+                func.sum(VatReport.amount/(1+VatReport.vat_amount/100)),#'net_total',
+                func.sum(VatReport.amount-VatReport.amount/(1+VatReport.vat_amount/100)),#'vat_total',
+            ]    
+
+            ret_fisc = syncobj.destination.query(*query_lst)
+            ret_fisc = ret_fisc.group_by(*groupby)
+            ret_fisc = ret_fisc.join(CashReport, CashReport.report_id == FiscalReport.report_id)
+            ret_fisc = ret_fisc.join(VatReport, VatReport.cash_report_id == CashReport.cash_report_id)
+            ret_fisc = ret_fisc.filter(and_(*fltr))   
+     
+            ret_fisc = ret_fisc.all()
+
+            if ret_fisc:
+                jdict['report_id']=ret_fisc[0][0]                
+                jdict['fisc_total']=ret_fisc[0][5]
+                jdict['fisc_net_total']=ret_fisc[0][6]                            
+                jdict['fisc_vat_total']=ret_fisc[0][7]  
+        for k,v in jdict.iteritems():
+            if hasattr(report, k):
+                setattr(report,k,v)                  
+        syncobj.destination.add(report)
+        syncobj.destination.flush()
+    transaction.commit()            
