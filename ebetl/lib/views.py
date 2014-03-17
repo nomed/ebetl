@@ -727,7 +727,7 @@ def sync_lilliput(*args, **kw):
             ret_fisc = ret_fisc.filter(and_(*fltr))   
      
             ret_fisc = ret_fisc.all()
-
+            jdict = {}
             if ret_fisc:
                 jdict['report_id']=ret_fisc[0][0]                
                 jdict['fisc_total']=ret_fisc[0][5]
