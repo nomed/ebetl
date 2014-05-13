@@ -519,6 +519,7 @@ class Movimentir(DeclarativeBase):
     #stileriga
     ordine = Column(Integer)
     #pk
+ 
 
 class Gruppipos(DeclarativeBase):
     __tablename__='gruppipos'
