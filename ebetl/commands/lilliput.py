@@ -82,13 +82,16 @@ class Lilliput(Command):
     parser.add_option("-s", "--sync",
                        dest="sync",metavar='sync',
                       help="Sync lilliput (fiscal) reports")                
+    parser.add_option("-p", "--print",
+                       dest="printr",metavar='printr',
+                      help="Print reports")                       
     (options, args) = parser.parse_args()
 
 
 
     def command(self):
         config=load_config(self.args)
-        from ebetl.lib.views import get_dailytotals,get_dailymenuitems, sync_do, sync_dmi, sync_lilliput
+        from ebetl.lib.views import get_dailytotals,get_dailymenuitems, sync_do, sync_dmi, sync_lilliput, print_fact_dmi
         if self.options.fromd:
             fromd = dt.strptime(self.options.fromd, "%Y%m%d")
         if self.options.tod:
@@ -140,7 +143,7 @@ class Lilliput(Command):
             #    print "|".join(p)   
             sync_dmi(results)                                                                                              
 
-        elif not self.options.sync:    
+        elif not self.options.sync and not self.options.printr:    
             # (u'000297', 2013, 1, 8, 396, 14.901287878787729, 5396.611399999985, 504.2985999999985, 5900.909999999941)
             retly_tmp = get_dailytotals(fromd - rd(years=1), tod - rd(years=1))
             retly = []
@@ -183,6 +186,26 @@ class Lilliput(Command):
             #print results                          
         if self.options.sync:
             sync_lilliput()
+        if self.options.printr:
+            from prettytable import PrettyTable
+            ret, tot = print_fact_dmi('000351', fromd, tod)            
+            print tot
+            x = PrettyTable(["Famiglia", "Tot AC", "Tot AP", "Diff"])
+            x.align["Famiglia"] = "l" 
+            x.align["Tot"] = "r" 
+            x.align["Tot AC"] = "r"             
+            x.align["Tot AP"] = "r"             
+            x.align["Diff"] = "r"              
+            x.padding_width = 1 # One space between column edges and contents (default)
+            x.float_format = '.2'
+            for r in ret:
+                x.add_row(r)
+            for t in tot:
+                t_lst = ['TOTALE'] + [i for i in t]
+                x.add_row(t_lst)
+                       
+            print x
+            
 
 
 

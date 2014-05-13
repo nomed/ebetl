@@ -696,6 +696,7 @@ def sync_lilliput(*args, **kw):
         __tablename__ = 'micros_vatfee'
         __table_args__ = (
             {'autoload':True}
+            )
 
     reports = syncobj.destination.query(Report).filter(and_(Report.report_id==None)).all()
     for report in reports:
@@ -738,4 +739,64 @@ def sync_lilliput(*args, **kw):
                     setattr(report,k,v)                  
             syncobj.destination.add(report)
             syncobj.destination.flush()
-    transaction.commit()            
+    transaction.commit()
+
+
+def print_fact_dmi(location_code, fromd, tod, *args, **kw):
+    syncobj = Syncobj(config)
+    Base = declarative_base()
+    Base.metadata.reflect(syncobj.dengine)
+    class Report(Base):
+        __tablename__ = 'fact_dmi'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class Location(Base):
+        __tablename__ = 'dim_location'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    print fromd, tod
+    fltr = [
+
+        Report.date >= fromd,
+        Report.date < tod,
+        Report.location_code==location_code,
+
+    ]
+    groupby = [
+        
+    Report.major_group_label    
+    ]
+    query_lst = groupby + [
+        func.sum(Report.total),
+        func.sum(Report.total_ly),        
+        func.sum(Report.total-Report.total_ly),
+    ]
+    ret = syncobj.destination.query(*query_lst)
+    ret = ret.group_by(*groupby)
+    ret = ret.filter(and_(*fltr))   
+ 
+    ret = ret.all()    
+
+    fltr = [
+
+        Report.date >= fromd,
+        Report.date < tod,
+        Report.location_code==location_code,
+
+    ]
+    groupby = [ 
+    ]
+    query_lst = groupby + [
+        func.sum(Report.total),
+        func.sum(Report.total_ly),        
+        func.sum(Report.total-Report.total_ly),
+    ]
+    ret2 = syncobj.destination.query(*query_lst)
+    ret2 = ret2.group_by(*groupby)
+    ret2 = ret2.filter(and_(*fltr))   
+ 
+    ret2 = ret2.all()       
+
+    return ret , ret2                      
