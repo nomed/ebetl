@@ -499,6 +499,7 @@ class Movimentir(DeclarativeBase):
     #stileriga
     ordine = Column(Integer)
     #pk
+ 
 
 class Ricevutet(DeclarativeBase):
     __tablename__='ricevutet'

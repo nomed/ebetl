@@ -113,7 +113,7 @@ setup(
     #exportclifor = ebetl.commands.exportclifor:Exportclifor   
     #cleanupcar = ebetl.commands.cleanupcar:Cleanupcar
     #getgrammatura = ebetl.commands.getgrammatura:Getgrammatura
-    #mycommand = ebetl.commands.mycommand:Mycommand
+    mycommand = ebetl.commands.mycommand:Mycommand
     #bigupdate = ebetl.commands.listini.bigupdate:Bigupdate
     #clientifid = ebetl.commands.clientifid:Clientifid
     #testcmd = ebetl.commands.testcmd:Testcmd  
