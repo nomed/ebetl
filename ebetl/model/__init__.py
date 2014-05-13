@@ -53,7 +53,7 @@ def init_model(engine):
     # See the following example:
 
     #global prodotti
-    
+
     #prodotti = Table("prodotti", metadata,
     #    autoload=True, autoload_with=engine)
     #class Prodotti(object):
@@ -67,5 +67,5 @@ from ebetl.model.dbretail import *
 #from ebetl.model.bizerba import Winvarp
 #from ebetl.model.sisa import Sisa, SisaEan
 #from ebetl.model.foodmart import Account
-from ebetl.model.zerobi import Factcogs, Factb2b
+from ebetl.model.zerobi import Factcogs, Factb2b, Factlaborcost
 #from ebetl.model.benettontv import UcbtvTabelle, UcbtvStagioni, UcbtvStagcol, UcbtvPLyxR, UcbtvPLyxT, UcbtvMessaggio

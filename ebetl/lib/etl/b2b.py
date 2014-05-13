@@ -7,14 +7,14 @@ import glob, json
 
 import logging, os, re, sys
 logging.basicConfig(
-    level=logging.DEBUG)
+    level=logging.WARN)
 log = logging.getLogger('b2b')
 
 from ebetl.lib.etl import get_txn
 from ebetl.model import *
 from ebetl.model.dbretail import Inputb2b
 from ebetl.model.zerobi import Factb2b, FACT_B2B, FACT_B2B_PRICE
-import transaction 
+import transaction
 
 from sqlalchemy import and_
 from ebetl.lib.views import get_mov
@@ -24,47 +24,47 @@ from ebetl.lib import strip_non_ascii
 from itertools import groupby
 from pprint import pprint
 
-    
+
 
 mapper = Mapper()
 
 class B2bObj(object):
     """
     dbretail.path_input = %(here)s/archive/input/b2b
-    dbretail.notfound = 1601000000    
+    dbretail.notfound = 1601000000
     """
 
     def __init__(self, config,record='dbretail', *args, **kw):
         """
         """
         self.record = record
-        self.config=config   
+        self.config=config
         self.movcode = config.get("%s.movcode"%(self.record))
         if self.movcode:
             self.movcode = [c.strip() for c in self.movcode.split(',')]
-                          
+
         self.path = config.get(record+'.path_input')
         self.path_jsonmap = os.path.join(
                         self.path,
                         'mappers', "%s_target.json"%record
                         )
-        jsonf = open(self.path_jsonmap , "r" )  
+        jsonf = open(self.path_jsonmap , "r" )
         self.jsonmap = json.load(jsonf)
-        jsonf.close()      
-        
-        self.notfound=self.config.get("%s.notfound"%(self.record))  
+        jsonf.close()
+
+        self.notfound=self.config.get("%s.notfound"%(self.record))
         #if not self.notfound :
-        #     self.notfound=self.config.get('ebetl.notfound')  
+        #     self.notfound=self.config.get('ebetl.notfound')
         #print self.notfound, self.path_jsonmap
 
     def _get_files(self, *args, **kw):
         orlist = []
         for c in self.movcode:
-            orlist.append(Movimentit.codicemovimento==c) 
+            orlist.append(Movimentit.codicemovimento==c)
         ret = DBSession.query(Movimentit).filter(Movimentit.controllonote==10)
         ret = ret.filter(or_(*orlist))
         ret = ret.order_by(Movimentit.datadocumento)
-        
+
         return ret.all()
 
     def _datagrid(self, query_lst , groupby, fltr):
@@ -75,42 +75,43 @@ class B2bObj(object):
     def export(self, *args, **kw):
         """
         Export inputb2b to dbretail
-        
+
         Factb2b.b2b_id == Movimentir.instablog
         Factb2b.instablog == Movimentit.numeromovimento
         Factb2b.updtablog == Movimentir.numeromovimento
-        
-        """  
-        print "========================== STARTED" 
+
+        """
+        #print "========================== STARTED"
         # get files to process
         files = DBSession.query(Inputb2b).filter(
             and_(Inputb2b.booked==1,or_(Inputb2b.exported==0, Inputb2b.exported==None))).all()
-        vat = {}  
-        log.info("export : found %s to process"%(len(files)))           
+        vat = {}
+        log.info("export : found %s to process"%(len(files)))
         for i in files:
             # STEP 1
-        
+
             _logprefix1 = "export: %s "%(i.b2b_id)
-            
-            log.debug(_logprefix1+"- start processing")
-            
+
+            #log.debug(_logprefix1+"- start processing")
+
             # fetch input_b2b.b2b_id
             groupby = [Provenienze, Factb2b.rec_num, Factb2b.rec_date]
             query_lst = groupby + FACT_B2B
             fltr = [Factb2b.inputb2b_id==i.b2b_id,
                     Factb2b.supplier_id==Provenienze.numeroprovenienza
-                     ] 
+                     ]
             recs = self._datagrid(query_lst, groupby, fltr)
-            
-            log.debug(_logprefix1+ '- found %s recs to process'%(len(recs)))
-            
+
+            #log.debug(_logprefix1+ '- found %s recs to process'%(len(recs)))
+
             # fetch all recs from fact_b2b for b2b_id and supplier_id
             recsvat = []
-            
+
             # STEP 2
 
             for rec in recs:
-                
+                print rec[1]
+
                 rech =  DBSession.query(Movimentit)
                 rech = rech.filter(and_(
                     Movimentit.numerodocumento == rec[1],
@@ -119,15 +120,15 @@ class B2bObj(object):
                     )
                 )
                 try:
-                    rechobj = rech.one() 
+                    rechobj = rech.one()
                 except:
                     #raise
                     rechobj = Movimentit()
                     rechobj.numerodocumento = rec[1]
                     rechobj.datadocumento = rec[2]
                     rechobj.numeroprovenienza = rec[0].numeroprovenienza
-                    rechobj.numerocodicemovimento = 7
-                    rechobj.codicemovimento = 'CARICO'
+                    rechobj.numerocodicemovimento = 10
+                    rechobj.codicemovimento = 'FACFOR'
                     rechobj.clifor = 'F'
                     rechobj.ingressouscita = 'I'
                     rechobj.tipodocumento = 'CAR'
@@ -137,43 +138,51 @@ class B2bObj(object):
 
                 rechobj.ragionesociale = rec[0].provenienza
                 rechobj.partitaiva = rec[0].partitaiva
-                rechobj.codicefiscale = rec[0].codicefiscale  
+                rechobj.codicefiscale = rec[0].codicefiscale
                 rechobj.indirizzo = rec[0].indirizzo
                 rechobj.cap = rec[0].cap
                 rechobj.prov = rec[0].prov
-                rechobj.citta = rec[0].citta               
+                rechobj.citta = rec[0].citta
                 rechobj.totaleimponibile = rec[4]
                 rechobj.totaleiva = rec[5]
                 rechobj.totaledocumento = rec[6]
-                rechobj.sincrofield = DBSession.execute(contasincrofield)
-                
+                #rechobj.sincrofield = DBSession.execute(contasincrofield)
+
                 DBSession.add(rechobj)
                 DBSession.flush()
-                
+
                 _logprefix2 = _logprefix1 + "- rech %s (%s) "%(
                                     rechobj.numeromovimento,
                                     rechobj.numerodocumento)
-                
-                log.debug(_logprefix2+ "- created")
-                
+
+                #log.debug(_logprefix2+ "- created")
+                print rechobj.numeromovimento, recsvat
                 if not rechobj.numeromovimento in recsvat:
                     # Vat
+
                     groupby = [Factb2b.rec_num, Factb2b.b2b_vat_code]
                     query_lst = groupby + FACT_B2B
                     fltr = fltr = [Factb2b.inputb2b_id==i.b2b_id,
                         Factb2b.supplier_id==Provenienze.numeroprovenienza,
                         Factb2b.rec_num == rec[1]
-                         ] 
-                
-                    vat_movs = self._datagrid(query_lst, groupby, fltr) 
+                         ]
+
+                    vat_movs = self._datagrid(query_lst, groupby, fltr)
+
                     for v in vat_movs:
-                        
+                        print "="*30 , v
                         if not v[1] in vat:
                             vcode = str(v[1]).zfill(2)
-                            vobj = DBSession.query(Iva).filter_by(codiceiva=vcode).one()
-                            
-                            vat[v[1]] = vobj                                        
-                        
+                            try:
+                                vobj = DBSession.query(Iva).filter_by(codiceiva=vcode).one()
+                            except:
+                                vobj = Iva()
+                                vobj.codiceiva=vcode
+                                vobj.valoreiva=int(vcode)
+                                DBSession.add(vobj)
+
+                            vat[v[1]] = vobj
+
                         try:
                             vatmovobj = DBSession.query(Movimentiiva).filter(and_(
                                 Movimentiiva.numeromovimento == rechobj.numeromovimento,
@@ -183,38 +192,42 @@ class B2bObj(object):
                             vatmovobj = Movimentiiva()
                             vatmovobj.numeromovimento = rechobj.numeromovimento
                             vatmovobj.numeroiva = vat[v[1]].numeroiva
+
+                            print "="*30 , vatmovobj
+
                         vatmovobj.totaleimponibile = v[3]
                         vatmovobj.totaleiva = v[4]
-                        vatmovobj.sincrofield = DBSession.execute(contasincrofield)
+                        try:
+                            vatmovobj.sincrofield = DBSession.execute(contasincrofield)
+                        except:
+                            pass
                         DBSession.add(vatmovobj)
-                        
-                        log.debug(_logprefix2+ "- added mov for vat id %s"%(
-                                vatmovobj.numeroiva
-                        ))
-                        
+
+                        #log.debug(_logprefix2+ "- added mov for vat id %s"%(vatmovobj.numeroiva))
+
                     recsvat.append(rechobj.numeromovimento)
-                    
-                    
-                        
-             
-             
+
+
+
+
+
                 rec_rows = DBSession.query(Factb2b).filter(
                             and_(
                                 Factb2b.inputb2b_id==i.b2b_id,
                                 Factb2b.supplier_id==rechobj.numeroprovenienza,
                                 Factb2b.rec_date==rechobj.datadocumento,
                                 Factb2b.rec_num==rechobj.numerodocumento,
-                            
+
                             )
                                 ).all()
-                
-                log.debug(_logprefix2+"- found %s rows to process"%(len(rec_rows)))
-                
-                # STEP 3                                               
+
+                #log.debug(_logprefix2+"- found %s rows to process"%(len(rec_rows)))
+
+                # STEP 3
                 for r in rec_rows:
-                    
+
                     _logprefix3 = _logprefix2
-                    
+
                     try:
                         recrobj = DBSession.query(Movimentir).filter_by(
                                     instablog = r.b2b_id
@@ -222,12 +235,18 @@ class B2bObj(object):
                     except:
                         recrobj = Movimentir()
                         recrobj.instablog = r.b2b_id
+                    try:
+                        account_id = DBSession.query(Conticontabilita).filter_by(codicecontocontabilita=r.account_code).one()
+                        account_id = account_id.numerocontocontabilita
+                    except:
+                        account_id = r.account_id
+                        raise
                     recrobj.datamovimento = r.rec_date
                     recrobj.dataregistrazione = r.rec_date
                     recrobj.movqta = 1
                     recrobj.movval = 0
                     recrobj.tiporiga = 'P'
-                    recrobj.codice = r.supplier_item_code  
+                    recrobj.codice = r.supplier_item_code
                     recrobj.descrizione = r.b2b_desc
                     recrobj.tipoprodotto = 'PRD'
                     recrobj.idprodotto = r.item_id
@@ -237,7 +256,7 @@ class B2bObj(object):
                     recrobj.numeroiva = vat[r.b2b_vat_code].numeroiva
                     recrobj.numeroreparto = r.fam_id
                     recrobj.numeroprodottoproduttore = r.supplier_item_id
-                    recrobj.numerocontocontabilita = r.account_id
+                    recrobj.numerocontocontabilita = account_id
                     recrobj.codiceqta = 'CARICO'
                     recrobj.qtamovimento = r.b2b_uom_qty
                     recrobj.ordine = r.row
@@ -248,50 +267,57 @@ class B2bObj(object):
                     recrobj.prezzonetto = r.b2b_net_total/r.b2b_uom_qty
                     recrobj.prezzo = recrobj.prezzonetto * vat[r.b2b_vat_code].mult
                     recrobj.ivaprezzo = recrobj.prezzo - recrobj.prezzonetto
-                    recrobj.sincrofield = DBSession.execute(contasincrofield)
-                    print r.cost_center_code
-                    cc = DBSession.query(Magazzini).filter_by(codicemagazzino=r.cost_center_code).one()
-                    
+                    try:
+                        recrobj.sincrofield = DBSession.execute(contasincrofield)
+                    except:
+                        pass
+                    #print r.cost_center_code
+                    try:
+                        cc = DBSession.query(Magazzini).filter_by(codicemagazzino=r.cost_center_code).one()
+                    except:
+                        cc = Magazzini(codicemagazzino=r.cost_center_code)
+                        cc.numeromagazzino = DBSession.execute(contamagazzino)
+                        DBSession.add(cc)
+
                     recrobj.numeromagazzino = cc.numeromagazzino
-                    
+
                     rechobj.movimentir.append(recrobj)
                     DBSession.add(recrobj)
                     DBSession.flush()
                     r.rec_id = rechobj.numeromovimento
                     r.rec_row = recrobj.numerorigamovimento
                     DBSession.add(r)
-                    DBSession.flush()                    
-                    
-                    
-                    
-                    log.debug(_logprefix2+"- added recr id %s"%(recrobj.numerorigamovimento))
-                    
-                log.debug(_logprefix2 +"- completed %s (%s)" %(
-                            rechobj.numeromovimento, rechobj.numerodocumento))
-                
-            i.exported = 1 
-            log.debug(_logprefix1+"- set flag exported to 1")                
+                    DBSession.flush()
+
+
+
+                    #log.debug(_logprefix2+"- added recr id %s"%(recrobj.numerorigamovimento))
+
+                #log.debug(_logprefix2 +"- completed %s (%s)" %(rechobj.numeromovimento, rechobj.numerodocumento))
+
+            i.exported = 1
+            #log.debug(_logprefix1+"- set flag exported to 1")
             DBSession.add(i)
             DBSession.flush()
         transaction.commit()
- 
-  
+
+
         #for fobj in files:
 
 
     def write_out(self, *args, **kw):
         """
         Process files from db and process docs and recs
-        """   
+        """
         # get files to process
         files = self._get_files()
-        
-        log.info("movs : found %s to process"%(len(files)))  
-  
+
+        log.info("movs : found %s to process"%(len(files)))
+
         for fobj in files:
-           
-            results = get_mov(fobj.numeromovimento, self.movcode)         
-            log.debug("")
+
+            results = get_mov(fobj.numeromovimento, self.movcode)
+            #log.debug("")
             log.info("mov id: id %s with %s results"%(fobj.numeromovimento, len(results)))
 
             #row = 1
@@ -303,14 +329,9 @@ class B2bObj(object):
                     src, func = val
                     newval = getattr(mapper, func)(res[src])
                     factb2b_dict[key] = newval
-                    log.debug("fact_b2b: %s | %s | %s | %s => %s"%(
-                            src, func, key, 
-                            unicode(str(res[src]), errors='replace'),
-                            
-                            [str(newval).decode("latin-1")]
-                ))
-                     
-              
+                    #log.debug("fact_b2b: %s | %s | %s | %s => %s"%(src, func, key,unicode(str(res[src]), errors='replace'),[str(newval).decode("latin-1")]))
+
+
                 and_c = and_(
                                  Factb2b.supplier_id==factb2b_dict['supplier_id'],
                                  Factb2b.doc_id==factb2b_dict['doc_id'],
@@ -320,44 +341,43 @@ class B2bObj(object):
                                  #Factb2b.b2b_sale_type==factb2b_dict['b2b_sale_type'],
                                  #Factb2b.b2b_code==factb2b_dict['b2b_code'],
                                  Factb2b.doc_row==factb2b_dict['doc_row'],
-                                 )  
+                                 )
 
 
                 try:
 
                     fobjrow = DBSession.query(Factb2b).filter(*and_c).one()
-                    log.debug("fact_b2b: found row id %s"%(fobjrow.b2b_id))
-                                
+                    #log.debug("fact_b2b: found row id %s"%(fobjrow.b2b_id))
+
                 except:
-                    fobjrow = Factb2b()  
-                    log.debug("fact_b2b: row NOT found")                   
+                    fobjrow = Factb2b()
+                    #log.debug("fact_b2b: row NOT found")
 
 
                 setattr(fobjrow, "account_code", self.notfound )
 
                 for key, val in factb2b_dict.iteritems():
-                    if val:                        
+                    if val:
                         setattr(fobjrow, key, val)
                 fobjrow.booked = 1
                 fobjrow.validated = 1
                 fobjrow.closed = 1
-                DBSession.add(fobjrow) 
-                
-                #print fobjrow,fobjrow.doc_num                
-                DBSession.flush()             
-                log.debug("fact_b2b: processed doc #%s - ref #%s"%(fobjrow.doc_num,
-                                                                    fobjrow.rec_num)) 
-                #row += 1  
+                DBSession.add(fobjrow)
+
+                #print fobjrow,fobjrow.doc_num
+                DBSession.flush()
+                #log.debug("fact_b2b: processed doc #%s - ref #%s"%(fobjrow.doc_num,fobjrow.rec_num))
+                #row += 1
             #fobj.processed = 1
             fobj.controllonote = 20
-            DBSession.add(fobj)  
-            DBSession.flush()              
+            DBSession.add(fobj)
+            DBSession.flush()
         transaction.commit()
-    
-       
-    
-          
-            
-            
-        
-    
+
+
+
+
+
+
+
+
