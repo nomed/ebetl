@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+import sys, os, traceback, optparse
+import time
+import re
+import csv
+#from pexpect import run, spawn
+
+
 """
 GruppiPosST
 codici Gruppi Pos separati da pipe es ;GruppiPosST=|1|3|;
@@ -75,10 +82,17 @@ record = [
     (164, 171, 'uso_futuro'),
     (171, 172, 'fisso04'),
     (172, 180, 'costo'), #x1000 (netto iva)
-    (180, 198, 'uso_futuro'),
+    (180, 198, 'uso_futuro2'),
     (198, 203, 'codice_plu'),
     (203, 208, 'codice_bil'),
 	]
+
+record_dict = {}
+
+for r in record:
+    record_dict[r[2]]=r[1]-r[0]
+
+	
 	
 # ;GruppiPosST=|3|
 # ;FidelityST
@@ -139,8 +153,131 @@ class Ind(object):
         pass
 
 """
+class ToDat(object):
+    ean_file_name = 'LEG_EAN.csv'
+    plu_file_name = 'TEan.csv'
+    prefix = '_todat'
+        
+    def __init__(self, path_input=None, *args, **kw):
+        self.path_input = os.path.join(path_input, 'input', self.prefix)
+    
+    def _get_plu_file_path(self):
+        return os.path.join(self.path_input, self.plu_file_name)
+    
+    plu_file_path = property(_get_plu_file_path)
+
+    def _out_plu_file_path(self):
+        return os.path.join(self.path_input, 'Articoli.dat')
+    
+    out_file_path = property(_out_plu_file_path)
+    
+    def _get_ean_file_path(self):
+        return os.path.join(self.path_input, self.ean_file_name)
+        
+    ean_file_path = property(_get_ean_file_path)
+    
+    def get_div100(self, s):
+        return round(float(s)/100,2)
+    def get_int(self,s):
+        return round(int(s),2)
+
+    def read(self):
+        spamreader = csv.reader(open(self.plu_file_path), delimiter=';', quotechar='"')  
+        ret = [r for r in spamreader] 
+        return ret
+
+    def convert_row(self, row):
+        pass
+
+    def write(self):
+        pass       
+
+class Gamba(ToDat):
+    ean_file_name = 'LEG_EAN.csv'
+    plu_file_name = 'TEan.csv'
+    prefix = 'gamba'
+    codice_interno = 1
+    ean = 4
+    descrizione = 3
+    prezzo = 15
+    codice_iva = 6
+    codice_reparto = 5
+    def convert_item(self, key, val):
+        if key == 'prezzo':
+            val = int(float(val)*100)
+        return str(val)
+    
+    def convert_row(self, row):
+        ret = {}
+        for key, rec in record_dict.iteritems():
+            ch = ' '*rec
+            if key in ['fisso01', 'fisso02']:
+                ch = '-'
+            elif key in ['fisso03','fisso04']:
+                ch = '*'  
+            if hasattr(self, key):
+                ch = self.convert_item(key, row[getattr(self, key)-1])                             
+                if len(ch) < rec:
+                    ch = ' '*(rec-len(ch))+ch                    
+            ret[key]=ch[0:rec]
+
+        return ret
+        
+    def write(self):
+        lines = self.read()
+        f = open(self.out_file_path,'ab')
+        
+        for line in lines[1:]:
+            row = self.convert_row(line)
+            art = ''
+            for i in record:
+                #print art
+                art = art + row.get(i[2])
+                #print i , [row.get(i[2])]               
+            print >> f, art
+        f.close()
+        
+        
 
 
+
+def main ():
+
+    global options, args
+    # TODO: Do something more interesting here...
+    print 'Hello world!'
+
+if __name__ == '__main__':
+    try:
+        start_time = time.time()
+        parser = optparse.OptionParser(formatter=optparse.TitledHelpFormatter(), usage=globals()['__doc__'], version='$Id$')
+        parser.add_option ('-v', '--verbose', action='store_true', default=False, help='verbose output')
+        parser.add_option ('-g', '--gamba', action='store_true', default=False, help='gamba')
+        (options, args) = parser.parse_args()
+        print args
+        if len(args) < 1:
+            parser.error ('missing argument')
+        source = args[0]
+            
+        if options.verbose: print time.asctime()
+        main()
+        if options.gamba:
+            obj = Gamba(source)
+            print obj.write()
+
+        if options.verbose: print time.asctime()
+        if options.verbose: print 'TOTAL TIME IN MINUTES:',
+        if options.verbose: print (time.time() - start_time) / 60.0
+        sys.exit(0)
+    except KeyboardInterrupt, e: # Ctrl-C
+        raise e
+    except SystemExit, e: # sys.exit()
+        raise e
+    except Exception, e:
+        print 'ERROR, UNEXPECTED EXCEPTION'
+        print str(e)
+        traceback.print_exc()
+        os._exit(1)
 
 """
 import csv

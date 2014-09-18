@@ -306,3 +306,246 @@ def get_mov(id, *args, **kw):
     return ret
 
 
+<<<<<<< HEAD
+def sync_do(lines, *args, **kw):
+    syncobj = Syncobj(config)
+    Base = declarative_base()
+    Base.metadata.reflect(syncobj.dengine)
+    class Report(Base):
+        __tablename__ = 'fact_do'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class Location(Base):
+        __tablename__ = 'dim_location'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class FiscalReport(Base):
+        __tablename__ = 'micros_report'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class CashReport(Base):
+        __tablename__ = 'micros_cash_report'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class VatReport(Base):
+        __tablename__ = 'micros_vatfee'
+        __table_args__ = (
+            {'autoload':True}
+            )            
+    for r in lines:
+        jdict = dict(zip(DOKEYS_ALL, r))
+        #000352|2014|2|6|214|11,7844392523|2303,0197|218,8503|2521,87|159|14,0885534591|2053,9432|186,1368|2240,08
+        location_code = jdict.get('location_code')
+        
+        locobj = syncobj.destination.query(Location).filter_by(
+                      location_code=location_code).one()
+        team_id = locobj.location_id
+        year = jdict.get('year')
+        month = jdict.get('month')
+        day = jdict.get('day')
+
+        try:
+            report = syncobj.destination.query(Report).filter(and_(
+                      Report.team_id==team_id,
+                      Report.year==year,
+                      Report.month==month,
+                      Report.day==day)).one()                  
+        except:
+            report = Report(
+                      team_id=team_id,
+                      year=year,
+                      month=month,
+                      day=day,
+                      date=datetime(year,month,day),
+                      #acquired=0,
+                      #validated=0,
+                      #published=0,
+                      budget=0
+                      )
+        
+             
+        if not report.report_id:
+            fltr = [
+                FiscalReport.team_id == team_id,
+                FiscalReport.year == year,
+                FiscalReport.month == month,
+                FiscalReport.day == day,
+                FiscalReport.acquired == 1,
+                ]
+            groupby = [
+                FiscalReport.report_id,               
+                FiscalReport.team_id,
+                FiscalReport.year,
+                FiscalReport.month,
+                FiscalReport.day,
+                ] 
+            query_lst = groupby + [
+                func.sum(VatReport.amount),#'total',
+                func.sum(VatReport.amount/(1+VatReport.vat_amount/100)),#'net_total',
+                func.sum(VatReport.amount-VatReport.amount/(1+VatReport.vat_amount/100)),#'vat_total',
+            ]    
+
+            ret_fisc = syncobj.destination.query(*query_lst)
+            ret_fisc = ret_fisc.group_by(*groupby)
+            ret_fisc = ret_fisc.join(CashReport, CashReport.report_id == FiscalReport.report_id)
+            ret_fisc = ret_fisc.join(VatReport, VatReport.cash_report_id == CashReport.cash_report_id)
+            ret_fisc = ret_fisc.filter(and_(*fltr))   
+     
+            ret_fisc = ret_fisc.all()
+
+            if ret_fisc:
+                jdict['report_id']=ret_fisc[0][0]                
+                jdict['fisc_total']=ret_fisc[0][5]
+                jdict['fisc_net_total']=ret_fisc[0][6]                            
+                jdict['fisc_vat_total']=ret_fisc[0][7]  
+            for k,v in jdict.iteritems():
+                if hasattr(report, k):
+                    setattr(report,k,v)                  
+            syncobj.destination.add(report)
+            syncobj.destination.flush()
+    transaction.commit()
+    #x.float_format = "8.2"
+    #x.align = "r"
+    #x.align['location_stock'] = "l"
+    #x.header=False
+    #x.hrules = NONE
+    #print x
+
+def sync_lilliput(*args, **kw):
+    syncobj = Syncobj(config)
+    Base = declarative_base()
+    Base.metadata.reflect(syncobj.dengine)
+    class Report(Base):
+        __tablename__ = 'fact_do'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class Location(Base):
+        __tablename__ = 'dim_location'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class FiscalReport(Base):
+        __tablename__ = 'micros_report'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class CashReport(Base):
+        __tablename__ = 'micros_cash_report'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class VatReport(Base):
+        __tablename__ = 'micros_vatfee'
+        __table_args__ = (
+            {'autoload':True}
+            )
+
+    reports = syncobj.destination.query(Report).filter(and_(Report.report_id==None)).all()
+    for report in reports:
+        if not report.report_id:
+            fltr = [
+                FiscalReport.team_id == report.team_id,
+                FiscalReport.year == report.year,
+                FiscalReport.month == report.month,
+                FiscalReport.day == report.day,
+                FiscalReport.acquired == 1,
+                ]
+            groupby = [
+                FiscalReport.report_id,               
+                FiscalReport.team_id,
+                FiscalReport.year,
+                FiscalReport.month,
+                FiscalReport.day,
+                ] 
+            query_lst = groupby + [
+                func.sum(VatReport.amount),#'total',
+                func.sum(VatReport.amount/(1+VatReport.vat_amount/100)),#'net_total',
+                func.sum(VatReport.amount-VatReport.amount/(1+VatReport.vat_amount/100)),#'vat_total',
+            ]    
+
+            ret_fisc = syncobj.destination.query(*query_lst)
+            ret_fisc = ret_fisc.group_by(*groupby)
+            ret_fisc = ret_fisc.join(CashReport, CashReport.report_id == FiscalReport.report_id)
+            ret_fisc = ret_fisc.join(VatReport, VatReport.cash_report_id == CashReport.cash_report_id)
+            ret_fisc = ret_fisc.filter(and_(*fltr))   
+     
+            ret_fisc = ret_fisc.all()
+            jdict = {}
+            if ret_fisc:
+                jdict['report_id']=ret_fisc[0][0]                
+                jdict['fisc_total']=ret_fisc[0][5]
+                jdict['fisc_net_total']=ret_fisc[0][6]                            
+                jdict['fisc_vat_total']=ret_fisc[0][7]  
+            for k,v in jdict.iteritems():
+                if hasattr(report, k):
+                    setattr(report,k,v)                  
+            syncobj.destination.add(report)
+            syncobj.destination.flush()
+    transaction.commit()
+
+
+def print_fact_dmi(location_code, fromd, tod, *args, **kw):
+    syncobj = Syncobj(config)
+    Base = declarative_base()
+    Base.metadata.reflect(syncobj.dengine)
+    class Report(Base):
+        __tablename__ = 'fact_dmi'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    class Location(Base):
+        __tablename__ = 'dim_location'
+        __table_args__ = (
+            {'autoload':True}
+            )
+    print fromd, tod
+    fltr = [
+
+        Report.date >= fromd,
+        Report.date < tod,
+        Report.location_code==location_code,
+
+    ]
+    groupby = [
+        
+    Report.major_group_label    
+    ]
+    query_lst = groupby + [
+        func.sum(Report.total),
+        func.sum(Report.total_ly),        
+        func.sum(Report.total-Report.total_ly),
+    ]
+    ret = syncobj.destination.query(*query_lst)
+    ret = ret.group_by(*groupby)
+    ret = ret.filter(and_(*fltr))   
+ 
+    ret = ret.all()    
+
+    fltr = [
+
+        Report.date >= fromd,
+        Report.date < tod,
+        Report.location_code==location_code,
+
+    ]
+    groupby = [ 
+    ]
+    query_lst = groupby + [
+        func.sum(Report.total),
+        func.sum(Report.total_ly),        
+        func.sum(Report.total-Report.total_ly),
+    ]
+    ret2 = syncobj.destination.query(*query_lst)
+    ret2 = ret2.group_by(*groupby)
+    ret2 = ret2.filter(and_(*fltr))   
+ 
+    ret2 = ret2.all()       
+
+    return ret , ret2                      
+=======
+>>>>>>> 46f9b2704206f6931d790dd63c60764e3c391bf7

@@ -117,7 +117,7 @@
     ], 
     "item_conf": [
         "prodotti.pezzixcollo", 
-        "get_strip"
+        "get_int"
     ], 
     "doc_num": [
         "h_doc_num", 
