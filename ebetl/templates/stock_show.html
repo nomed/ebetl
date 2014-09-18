@@ -101,8 +101,8 @@ from ebetl.controllers.root import todecimal
         <th class="">Product</th>
         <th class="text-right">Uom</th> 
         <th class="text-right">Qta</th>    
-        <!--<th class="text-right">Cost</th>            
-        <th class="text-right">Tot Cost</th>-->
+        <th class="text-right">Cost</th>            
+        <th class="text-right">Tot Cost</th>
     </tr>
     </thead>
     <tbody>
@@ -152,7 +152,7 @@ from ebetl.controllers.root import todecimal
                 <py:if test="inv">${todecimal(inv.totale_qta)}</py:if>
             </span>
         </td>             
-        <!--<td class="text-right">   
+        <td class="text-right">   
             <span id="cost$doc.numeroinventario/$prod.numeroprodotto" >
             <py:if test="inv">${todecimal(inv.costo)}</py:if>
             </span>
@@ -161,7 +161,7 @@ from ebetl.controllers.root import todecimal
             <span id="totale_costo$doc.numeroinventario/$prod.numeroprodotto" >
             <py:if test="inv"><b>${todecimal(inv.costo*inv.totale_qta)}</b></py:if>
             </span>
-        </td>-->     
+        </td>
                                     
     </tr>
 
